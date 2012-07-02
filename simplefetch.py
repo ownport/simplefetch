@@ -1,20 +1,55 @@
-#coding: utf8
+#!/usr/bin/env python
+# -*- coding: utf8 -*0
+#
+#
+#   simplefetch 
+#   
+#
+#   Simple HTTP library An easy to use HTTP client based on httplib.
+#
+#   based on lyxint/urlfetch https://github.com/lyxint/urlfetch 
+#   (c) 2011-2012  Elyes Du (lyxint@gmail.com)
+#   license: BSD 2-clause License, see LICENSE for details.
 
-'''
-urlfetch 
-~~~~~~~~~~
 
-An easy to use HTTP client based on httplib.
-
-:copyright: (c) 2011-2012  Elyes Du.
-:license: BSD 2-clause License, see LICENSE for details.
-'''
-
-__version__ = '0.3.7'
-__author__ = 'Elyes Du <lyxint@gmail.com>'
+__version__ = '0.1'
+__author__ = 'Elyes Du <lyxint@gmail.com>, Andrey Usov <http://devel.ownport.net>'
 __url__ = 'https://github.com/lyxint/urlfetch'
+__license__ = '''
+Copyright (c) 2012, Andrey Usov <http://devel.ownport.net>
+All rights reserved.
 
-import os, sys
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met: 
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer. 
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+'''
+#
+#   Session -> Headers -> Request -> Response -> Session (update)
+#
+
+
+import os
+import sys
+import socket
+import base64
+# TODO is it needed here if no codec modification in simplefetch.py?
+import codecs
 
 if sys.version_info >= (3, 0):
     py3k = True
@@ -44,11 +79,9 @@ else:
     def u(s):
         return unicode(s, "unicode_escape")
 
-import socket
-import base64
-from functools import partial
 from io import BytesIO
-import codecs
+from functools import partial
+# TODO no need to perform codec modification. It will be better to make by specfic library
 writer = codecs.lookup('utf-8')[3]
 
 
@@ -63,15 +96,9 @@ _allowed_methods = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", 
 class UrlfetchException(Exception): pass
 
 def sc2cs(sc):
-    '''Convert Set-Cookie header to cookie string.
-    
-    Set-Cookie can be retrieved from a :class:`~urlfetch.Response` instance::
-    
-        sc = response.getheader('Set-Cookie')
-    
-    :param sc: Set-Cookie
-    :type sc: string
-    :rtype: cookie string, which is name=value pairs joined by ``\;``.
+    # TODO make sc2cs as part of Headers class
+    '''
+    Convert Set-Cookie header to cookie string.
     '''
     c = Cookie.SimpleCookie(sc)
     sc = ['%s=%s' % (i.key, i.value) for i in c.itervalues()]
@@ -80,9 +107,8 @@ def sc2cs(sc):
 
 _boundary_prefix = None
 def choose_boundary():
-    '''Generate a multipart boundry.
-    
-    :rtype: string
+    '''
+    Generate a multipart boundry.
     '''
     
     global _boundary_prefix
@@ -101,13 +127,8 @@ def choose_boundary():
     return "(*^__^*)%s.%s" % (_boundary_prefix, uuid.uuid4().hex)
 
 def _encode_multipart(data, files):
-    '''Encode multipart.
-    
-    :param data: data to be encoded
-    :type data: dict
-    :param files: files to be encoded
-    :type files: dict
-    :rtype: encoded binary string
+    '''
+    Encode multipart.
     '''
     
     body = BytesIO()
@@ -125,7 +146,6 @@ def _encode_multipart(data, files):
                 body.write(value)
             body.write(b'\r\n')
             
-
     for fieldname, f in files.items():
         if isinstance(f, tuple):
             filename, f = f
@@ -172,12 +192,8 @@ class Headers(object):
         ''' make default headers '''
         self.__headers = {
             'Accept': '*/*',
-            'User-Agent':  'urlfetch/' + __version__,
+            'User-Agent':  'simplefetch/' + __version__,
         }
-    
-    def random_user_agent(self, filename):
-        ''' generate random User-Agent string from collection in filename'''
-        self.__headers['User-Agent'] = randua(filename)
     
     def basic_auth(self, username, password):
         ''' add username/password for basic authentication '''
@@ -185,61 +201,20 @@ class Headers(object):
         auth = base64.b64encode(auth.encode('utf-8'))
         self.__headers['Authorization'] = 'Basic ' + auth.decode('utf-8')
 
+    # TODO support list of parameters
     def put(self, k, v):
         ''' add new parameter to headers '''
         self.__headers[k.title()] = v
     
+    # TODO rename method items() to dump()
     def items(self):
         ''' return headers dictionary '''
         return self.__headers
 
 class Response(object):
-    '''A Response object.
-    
-    ::
-        
-        >>> import urlfetch
-        >>> response = urlfetch.get("http://docs.python.org/")
-        >>> 
-        >>> response.status, response.reason, response.version
-        (200, 'OK', 10)
-        >>> type(response.body), len(response.body)
-        (<type 'str'>, 8719)
-        >>> type(response.text), len(response.text)
-        (<type 'unicode'>, 8719
-        >>> response.getheader('server')
-        'Apache/2.2.16 (Debian)'
-        >>> response.getheaders()
-        [
-            ('content-length', '8719'),
-            ('x-cache', 'MISS from localhost'),
-            ('accept-ranges', 'bytes'),
-            ('vary', 'Accept-Encoding'),
-            ('server', 'Apache/2.2.16 (Debian)'),
-            ('last-modified', 'Tue, 26 Jun 2012 19:23:18 GMT'),
-            ('connection', 'close'),
-            ('etag', '"13cc5e4-220f-4c36507ded580"'),
-            ('date', 'Wed, 27 Jun 2012 06:50:30 GMT'),
-            ('content-type', 'text/html'),
-            ('x-cache-lookup', 'MISS from localhost:8080')
-        ]
-        >>> response.headers
-        {
-            'content-length': '8719',
-            'x-cache': 'MISS from localhost',
-            'accept-ranges': 'bytes',
-            'vary': 'Accept-Encoding',
-            'server': 'Apache/2.2.16 (Debian)',
-            'last-modified': 'Tue, 26 Jun 2012 19:23:18 GMT',
-            'connection': 'close',
-            'etag': '"13cc5e4-220f-4c36507ded580"',
-            'date': 'Wed, 27 Jun 2012 06:50:30 GMT',
-            'content-type': 'text/html',
-            'x-cache-lookup': 'MISS from localhost:8080'
-        }
-
     '''
-    
+    Response
+    '''
     def __init__(self, r, **kwargs):
         self._r = r # httplib.HTTPResponse
         self.msg = r.msg
@@ -254,7 +229,6 @@ class Response(object):
         self.version = r.version
         self._content = None
         self._headers = None
-        self._text = None
 
         self.getheader = r.getheader
         self.getheaders = r.getheaders
@@ -300,40 +274,13 @@ class Response(object):
                     raise UrlfetchException("Content length is more than %d bytes" % length_limit)  
             self._content = content
         return self._content
-    
-    @property
-    def text(self):
-        '''Response content in unicode.'''
         
-        if self._text is None:
-            self._text = mb_code(self.content)
-        return self._text
-    
     @property
     def headers(self):
-        '''Response headers.
+        '''
+        Response headers
         
         Response headers is a dict with all keys in lower case.
-        
-        ::
-        
-            >>> import urlfetch
-            >>> response = urlfetch.get("http://docs.python.org/")
-            >>> response.headers
-            {
-                'content-length': '8719',
-                'x-cache': 'MISS from localhost',
-                'accept-ranges': 'bytes',
-                'vary': 'Accept-Encoding',
-                'server': 'Apache/2.2.16 (Debian)',
-                'last-modified': 'Tue, 26 Jun 2012 19:23:18 GMT',
-                'connection': 'close',
-                'etag': '"13cc5e4-220f-4c36507ded580"',
-                'date': 'Wed, 27 Jun 2012 06:50:30 GMT',
-                'content-type': 'text/html',
-                'x-cache-lookup': 'MISS from localhost:8080'
-            }
-        
         '''
         
         if self._headers is None:
@@ -351,7 +298,8 @@ class Response(object):
 
 def fetch(url, data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT, 
         files={}, length_limit=None, **kwargs):
-    ''' fetch an URL.
+    '''
+    fetch an URL.
     
     :param url: URL to be fetched.
     :type url: string
@@ -457,26 +405,3 @@ options = partial(request, method="OPTIONS")
 trace = partial(request, method="TRACE", files={}, data=None)
 patch = partial(request, method="PATCH")
 
-
-def randua(filename):
-    '''Returns a User-Agent string randomly from file'''
-    import os
-    import random
-    from time import time
-    if os.path.isfile(filename):
-        uas = [ua.strip() for ua in open(filename).readlines() if not ua.strip().startswith('#')]
-        r_ua = random.Random(time())
-        return r_ua.choice(uas)
-    return 'urlfetch/%s' % __version__
-        
-def mb_code(s, coding=None):
-    '''encoding/decoding helper'''
-
-    if isinstance(s, unicode):
-        return s if coding is None else s.encode(coding)
-    for c in ('utf-8', 'gb2312', 'gbk', 'gb18030', 'big5'):
-        try:
-            s = s.decode(c, errors='replace')
-            return s if coding is None else s.encode(coding, errors='replace')
-        except: pass
-    return s
