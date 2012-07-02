@@ -1,5 +1,5 @@
 simplefetch
-===========
+-----------
 
 Simple HTTP library
 
