@@ -89,12 +89,12 @@ writer = codecs.lookup('utf-8')[3]
 __all__ = [
     'sc2cs', 'fetch', 'request', 
     'get', 'head', 'put', 'post', 'delete', 'options',
-    'Headers', 'UrlfetchException',
+    'Headers', 
 ] 
 
 _allowed_methods = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
 
-class UrlfetchException(Exception): pass
+class SimplefetchException(Exception): pass
 
 def sc2cs(sc):
     # TODO make sc2cs as part of Headers class
@@ -114,7 +114,7 @@ def choose_boundary():
     
     global _boundary_prefix
     if _boundary_prefix is None:
-        _boundary_prefix = "urlfetch"
+        _boundary_prefix = "simplefetch"
         import os
         try:
             uid = repr(os.getuid())
@@ -154,7 +154,7 @@ def _encode_multipart(data, files):
             filename = os.path.basename(f.name)
         else:
             filename = None
-            raise UrlfetchException("file must has filename")
+            raise SimplefetchException("file must has filename")
 
         if hasattr(f, 'read'):
             value = f.read()
@@ -245,7 +245,7 @@ class Response(object):
             
         if self.length_limit and int(self.getheader('Content-Length', 0)) > self.length_limit:
             self.close()
-            raise UrlfetchException("Content length is more than %d bytes" % length_limit)  
+            raise SimplefetchException("Content length is more than %d bytes" % length_limit)  
         
     def iter_content(self, chunk_size = 10 * 1024):
         ''' read content (for streaming and large files)
@@ -260,7 +260,7 @@ class Response(object):
         
     @classmethod
     def from_httplib(cls, r, **kwargs):
-        '''Generate a :class:`~urlfetch.Response` object from an httplib response object.'''
+        '''Generate a class Response object from an httplib response object.'''
         return cls(r, **kwargs)
         
     @property
@@ -272,7 +272,7 @@ class Response(object):
             for chunk in self.iter_content():
                 content += chunk
                 if self.length_limit and len(content) > self.length_limit:
-                    raise UrlfetchException("Content length is more than %d bytes" % length_limit)  
+                    raise SimplefetchException("Content length is more than %d bytes" % length_limit)  
             self._content = content
         return self._content
         
@@ -312,11 +312,11 @@ def fetch(url, data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
     :type files: dict, optional
     :param length_limit: if ``None``, no limits on content length, if the limit reached raised exception 'Content length is more than ...'
     :type length_limit: integer or None, default is ``none``
-    :rtype: A :class:`~urlfetch.Response` object
+    :rtype: A :class:`~simplefetch.Response` object
     
-    :func:`~urlfetch.fetch` is a wrapper of :func:`~urlfetch.request`.
-    It calls :func:`~urlfetch.get` by default. If one of parameter ``data``
-    or parameter ``files`` is supplied, :func:`~urlfetch.post` is called.
+    :func:`~simplefetch.fetch` is a wrapper of :func:`~simplefetch.request`.
+    It calls :func:`~simplefetch.get` by default. If one of parameter ``data``
+    or parameter ``files`` is supplied, :func:`~simplefetch.post` is called.
     '''
     
     local = locals()
@@ -345,13 +345,13 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     :type files: dict, optional
     :param length_limit: if ``None``, no limits on content length, if the limit reached raised exception 'Content length is more than ...'
     :type length_limit: integer or None, default is ``none``
-    :rtype: A :class:`~urlfetch.Response` object
+    :rtype: A :class:`~simplefetch.Response` object
     '''
 
     scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
     method = method.upper()
     if method not in _allowed_methods:
-        raise UrlfetchException("Method shoud be one of " + ", ".join(_allowed_methods))
+        raise SimplefetchException("Method shoud be one of " + ", ".join(_allowed_methods))
 
     requrl = path
     if query: requrl += '?' + query
@@ -371,7 +371,7 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     elif scheme == 'http':
         h = HTTPConnection(host, port=port, timeout=timeout)
     else:
-        raise UrlfetchException('Unsupported protocol %s' % scheme)
+        raise SimplefetchException('Unsupported protocol %s' % scheme)
         
     # default request headers
     reqheaders = Headers().items()
