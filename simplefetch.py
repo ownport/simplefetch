@@ -7,14 +7,15 @@
 #
 #   Simple HTTP library
 #
-#   based on lyxint/urlfetch https://github.com/lyxint/urlfetch 
+#   based on lyxint/urlfetch 
+#   https://github.com/lyxint/urlfetch 
 #   (c) 2011-2012  Elyes Du (lyxint@gmail.com)
 #   license: BSD 2-clause License, see LICENSE for details.
 
 
 __version__ = '0.1'
-__author__ = 'Elyes Du <lyxint@gmail.com>, Andrey Usov <http://devel.ownport.net>'
-__url__ = 'https://github.com/lyxint/urlfetch'
+__author__ = 'Andrey Usov <http://devel.ownport.net>'
+__url__ = 'https://github.com/ownport/simplefetch'
 __license__ = '''
 Copyright (c) 2012, Andrey Usov <http://devel.ownport.net>
 All rights reserved.
@@ -39,7 +40,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-#
+#   TODO
 #   Session -> Headers -> Request -> Response -> Session (update)
 #
 
@@ -246,7 +247,7 @@ class Response(object):
             self.close()
             raise UrlfetchException("Content length is more than %d bytes" % length_limit)  
         
-    def read_content(self, chunk_size = 10 * 1024):
+    def iter_content(self, chunk_size = 10 * 1024):
         ''' read content (for streaming and large files)
         
         chunk_size: size of chunk, default: 10 * 1024        
@@ -268,7 +269,7 @@ class Response(object):
         
         if self._content is None:
             content = b("")
-            for chunk in self.read_content():
+            for chunk in self.iter_content():
                 content += chunk
                 if self.length_limit and len(content) > self.length_limit:
                     raise UrlfetchException("Content length is more than %d bytes" % length_limit)  
