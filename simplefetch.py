@@ -5,7 +5,7 @@
 #   simplefetch 
 #   
 #
-#   Simple HTTP library An easy to use HTTP client based on httplib.
+#   Simple HTTP library
 #
 #   based on lyxint/urlfetch https://github.com/lyxint/urlfetch 
 #   (c) 2011-2012  Elyes Du (lyxint@gmail.com)
