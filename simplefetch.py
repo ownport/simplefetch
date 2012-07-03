@@ -5,7 +5,7 @@
 #   simplefetch 
 #   
 #
-#   Simple HTTP library
+#   Simple HTTP client library
 #
 #   based on lyxint/urlfetch 
 #   https://github.com/lyxint/urlfetch 
@@ -97,8 +97,22 @@ _allowed_methods = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", 
 #
 #   Exceptions
 #
-# TODO define exception for SimpleFetch events
-class SimplefetchException(Exception): pass
+
+class IncorrectFilename(Exception): 
+    ''' Incorrect filename exception '''
+    pass
+
+class ContentLengthLimitException(Exception):
+    ''' Content Length was reached limit '''
+    pass
+
+class UnsupportedMethodException(Exception): 
+    ''' Method is not supported'''
+    pass
+
+class UnsupportedProtocolException(Exception): 
+    ''' Protocol is not supported '''    
+    pass
 
 def sc2cs(sc):
     # TODO make sc2cs as part of Headers class
@@ -158,7 +172,7 @@ def _encode_multipart(data, files):
             filename = os.path.basename(f.name)
         else:
             filename = None
-            raise SimplefetchException("file must has filename")
+            raise IncorrectFilename("file must has filename")
 
         if hasattr(f, 'read'):
             value = f.read()
@@ -235,6 +249,7 @@ class Response(object):
         self._content = None
         self._headers = None
 
+        # TODO store headers to object Headers 
         self.getheader = r.getheader
         self.getheaders = r.getheaders
 
@@ -249,23 +264,18 @@ class Response(object):
             
         if self.length_limit and int(self.getheader('Content-Length', 0)) > self.length_limit:
             self.close()
-            raise SimplefetchException("Content length is more than %d bytes" % length_limit)  
+            raise ContentLengthLimitException("Content length is more than %d bytes" % length_limit)  
         
-    def iter_content(self, chunk_size = 10 * 1024):
+    def iter_content(self, chunk_size = 1024):
         ''' read content (for streaming and large files)
         
-        chunk_size: size of chunk, default: 10 * 1024        
+        chunk_size: size of chunk, default: 1024 bytes
         '''
         while True:
             chunk = self._r.read(chunk_size)
             if not chunk:
                 break
             yield chunk
-        
-    @classmethod
-    def from_httplib(cls, r, **kwargs):
-        '''Generate a class Response object from an httplib response object.'''
-        return cls(r, **kwargs)
         
     @property
     def content(self):
@@ -276,7 +286,7 @@ class Response(object):
             for chunk in self.iter_content():
                 content += chunk
                 if self.length_limit and len(content) > self.length_limit:
-                    raise SimplefetchException("Content length is more than %d bytes" % length_limit)  
+                    raise ContentLengthLimitException("Content length is more than %d bytes" % length_limit)  
             self._content = content
         return self._content
         
@@ -293,11 +303,13 @@ class Response(object):
         return self._headers
 
     def close(self):
+        ''' close '''
         if hasattr(self, 'connection'):
             self.connection.close()
         self._r.close()
 
     def __del__(self):
+        ''' delete Response object '''
         self.close()        
 
 def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
@@ -315,7 +327,7 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     :type timeout: integer or float, optional
     :param files: files to be sended
     :type files: dict, optional
-    :param length_limit: if ``None``, no limits on content length, if the limit reached raised exception 'Content length is more than ...'
+    :param length_limit: if ``None``, no limits on content length, if the limit reached raised ContentLengthLimitException 
     :type length_limit: integer or None, default is ``none``
     :rtype: A :class:`~simplefetch.Response` object
     '''
@@ -323,7 +335,7 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
     method = method.upper()
     if method not in _allowed_methods:
-        raise SimplefetchException("Method shoud be one of " + ", ".join(_allowed_methods))
+        raise UnsupportedMethodException("Method shoud be one of " + ", ".join(_allowed_methods))
 
     requrl = path
     if query: requrl += '?' + query
@@ -343,8 +355,8 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     elif scheme == 'http':
         h = HTTPConnection(host, port=port, timeout=timeout)
     else:
-        raise SimplefetchException('Unsupported protocol %s' % scheme)
-        
+        raise UnsupportedProtocolException('Unsupported protocol %s' % scheme)
+        s
     # default request headers
     reqheaders = Headers().items()
     
@@ -365,7 +377,7 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     
     h.request(method, requrl, data, reqheaders)
     response = h.getresponse()
-    return Response.from_httplib(response, reqheaders=reqheaders, connection=h, length_limit=length_limit)
+    return Response(response, reqheaders=reqheaders, connection=h, length_limit=length_limit)
 
 # some shortcuts
 get = partial(request, method="GET")
