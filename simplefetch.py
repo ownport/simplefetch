@@ -94,6 +94,10 @@ __all__ = [
 
 _allowed_methods = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
 
+#
+#   Exceptions
+#
+# TODO define exception for SimpleFetch events
 class SimplefetchException(Exception): pass
 
 def sc2cs(sc):
@@ -294,39 +298,7 @@ class Response(object):
         self._r.close()
 
     def __del__(self):
-        self.close()
-        
-
-def fetch(url, data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT, 
-        files={}, length_limit=None, **kwargs):
-    '''
-    fetch an URL.
-    
-    :param url: URL to be fetched.
-    :type url: string
-    :param headers: HTTP request headers
-    :type headers: dict, optional
-    :param timeout: timeout in seconds, socket._GLOBAL_DEFAULT_TIMEOUT by default
-    :type timeout: integer or float, optional
-    :param files: files to be sended
-    :type files: dict, optional
-    :param length_limit: if ``None``, no limits on content length, if the limit reached raised exception 'Content length is more than ...'
-    :type length_limit: integer or None, default is ``none``
-    :rtype: A :class:`~simplefetch.Response` object
-    
-    :func:`~simplefetch.fetch` is a wrapper of :func:`~simplefetch.request`.
-    It calls :func:`~simplefetch.get` by default. If one of parameter ``data``
-    or parameter ``files`` is supplied, :func:`~simplefetch.post` is called.
-    '''
-    
-    local = locals()
-    local.pop('kwargs')
-    local.update(kwargs)
-
-    if data is not None and isinstance(data, (basestring, dict)):
-        return post(**local)
-    return get(**local)
-
+        self.close()        
 
 def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
             files={}, length_limit=None, **kwargs):
