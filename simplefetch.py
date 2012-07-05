@@ -312,6 +312,7 @@ class Response(object):
         ''' delete Response object '''
         self.close()        
 
+# TODO review if Request class will be more useful for working with requests
 def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
             files={}, length_limit=None, proxy = None):
             
@@ -333,6 +334,7 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     '''
 
     # TODO add proxy support    
+    # TODO even if proxy is not defined -> check environment (http_proxy, htts_proxy)
     
     scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
     method = method.upper()
