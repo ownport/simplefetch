@@ -59,22 +59,22 @@ else:
     py3k = False
 
 if py3k:
-    from http.client import HTTPConnection, HTTPSConnection, HTTPException
-    from http.client import HTTP_PORT, HTTPS_PORT
-    from urllib.parse import urlencode, quote as urlquote, quote_plus as urlquote_plus
-    import urllib.parse as urlparse
     import http.cookies as Cookie
+    import urllib.parse as urlparse
+    from http.client import HTTP_PORT, HTTPS_PORT
+    from http.client import HTTPConnection, HTTPSConnection, HTTPException
+    from urllib.parse import urlencode, quote as urlquote, quote_plus as urlquote_plus
     basestring = (str, bytes)
     def b(s):
         return s.encode('latin-1')
     def u(s):
         return s
 else:
-    from httplib import HTTPConnection, HTTPSConnection, HTTPException
-    from httplib import HTTP_PORT, HTTPS_PORT
-    from urllib import urlencode, quote as urlquote, quote_plus as urlquote_plus
-    import urlparse
     import Cookie
+    import urlparse
+    from httplib import HTTP_PORT, HTTPS_PORT
+    from httplib import HTTPConnection, HTTPSConnection, HTTPException
+    from urllib import urlencode, quote as urlquote, quote_plus as urlquote_plus
     def b(s):
         return s
     def u(s):
@@ -82,7 +82,7 @@ else:
 
 from io import BytesIO
 from functools import partial
-# TODO no need to perform codec modification. It will be better to make by specfic library
+# TODO no need to perform codec modification. It's better to make it by specfic library
 writer = codecs.lookup('utf-8')[3]
 
 
@@ -313,7 +313,7 @@ class Response(object):
         self.close()        
 
 def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
-            files={}, length_limit=None, **kwargs):
+            files={}, length_limit=None, proxy = None):
             
     ''' request an URL
     
@@ -332,6 +332,8 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     :rtype: A :class:`~simplefetch.Response` object
     '''
 
+    # TODO add proxy support    
+    
     scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
     method = method.upper()
     if method not in _allowed_methods:
