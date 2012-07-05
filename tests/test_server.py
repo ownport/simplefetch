@@ -3,8 +3,28 @@
 #   run_test_server.py
 #
 
+import sys
+
+class stream2file:
+    ''' Stream wrapper for saving data in file'''
+    def __init__(self, filename='stream.data'):
+
+        self.fd = open(filename, 'a', 0)
+        
+    def write(self, data):
+        d = data.rstrip() 
+        if d == '': return
+        self.fd.write("%s\n" % d)
+
+    def close(self):
+        self.fd.close()
+
+try:
+    sys.stdout = sys.stderr = stream2file(filename=sys.argv[1])
+except IndexError:
+    pass
+
 import bottle
-import logging
 
 app = bottle.app()
 
@@ -29,13 +49,6 @@ def sleep(seconds):
 
     return 'sleep'
 
-if __name__ == '__main__':
-    import sys
-    try:
-        logfile = sys.argv[1]
-    except IndexError:
-        logfile = None
-    logging.basicConfig(format='%(asctime)s pid:%(process)d <%(levelname)s> %(message)s', 
-                        filename = logfile, 
-                        level=logging.DEBUG)
-    bottle.run(app=app, host='127.0.0.1', port=8800, reloader=True, debug=True)
+
+bottle.run(app=app, host='127.0.0.1', port=8800, reloader=True)
+
