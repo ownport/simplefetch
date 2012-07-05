@@ -383,6 +383,7 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     response = h.getresponse()
     return Response(response, reqheaders=reqheaders, connection=h, length_limit=length_limit)
 
+# TODO if class Request is used, make new shortcuts 
 # some shortcuts
 get = partial(request, method="GET")
 post = partial(request, method="POST")
