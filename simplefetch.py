@@ -1,11 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf8 -*0
+# -*- coding: utf8 -*-
 #
-#
-#   simplefetch 
-#   
-#
-#   Simple HTTP client library
+#   simplefetch, Simple HTTP client library
 #
 #   based on lyxint/urlfetch 
 #   https://github.com/lyxint/urlfetch 
@@ -87,9 +83,9 @@ writer = codecs.lookup('utf-8')[3]
 
 
 __all__ = [
-    'sc2cs', 'fetch', 'request', 
+    'fetch', 'request', 
     'get', 'head', 'put', 'post', 'delete', 'options',
-    'Headers', 
+    'Headers', 'Request', 'Response', 'Session',
 ] 
 
 _allowed_methods = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
@@ -114,8 +110,8 @@ class UnsupportedProtocolException(Exception):
     ''' Protocol is not supported '''    
     pass
 
-def sc2cs(sc):
-    # TODO make sc2cs as part of Headers class
+def cookie2str(cookie):
+    # TODO make cookie2str as part of Headers class
     '''
     Convert Set-Cookie header to cookie string.
     '''
