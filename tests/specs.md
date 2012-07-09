@@ -1,42 +1,40 @@
-## SimpleFecth specification
-```python
->>> import simplefetch
->>> resp = simplefetch.get("http://localhost:8080")
->>>
-```
+# SimpleFecth specification
+
+Simple HTTP client
 
 ## GET method
 
 ```python
->>> resp = simplefetch.get("http://localhost:8080")
+>>> import simplefetch
+>>> resp = simplefetch.get("http://localhost:8800")
 >>>
 ```
 
 ## POST method
 
 ```python
->>> resp = simplefetch.post("http://localhost:8080")
+>>> resp = simplefetch.post("http://localhost:8800")
 >>>
 ```
 
 ## HEAD method
 
 ```python
->>> resp = simplefetch.head("http://localhost:8080")
+>>> resp = simplefetch.head("http://localhost:8800")
 >>>
 ```
 
 ## Fetch 
 
 ```python
->>> resp = simplefetch.head("http://localhost:8080")
+>>> resp = simplefetch.fetch(method="GET", url="http://localhost:8800")
 >>>
 ```
 
 ## User-Agent usage (default)
 
 ```python
->>> resp = simplefetch.get("http://localhost:8080")
+>>> resp = simplefetch.get("http://localhost:8800")
 >>>
 ```
 
@@ -44,9 +42,16 @@
 
 ```python
 >>> headers = { 'User-Agent': 'my-simplefetch/0.1', }
->>> resp = simplefetch.get("http://localhost:8080", headers=headers)
+>>> resp = simplefetch.get("http://localhost:8800", headers=headers)
 >>>
 ```
+
+## Basic Authentication
+```python
+>>>
+>>>
+```
+
 
 ## Proxy support via HTTP_PROXY & HTTPS_PROXY environment variables
 
@@ -54,15 +59,21 @@ In case when HTTP\_PROXY HTTPS\_PROXY defined simplefetch can detect it automati
 used without any actions from users
 
 ```python
->>> resp = simplefetch.get("http://localhost:8080")
+>>> resp = simplefetch.get("http://localhost:8800")
 >>>
 ```
 
 ## Proxy support via fetch interface
 
 ```python
->>> resp = simplefetch.get("http://localhost:8080" , proxy={ 'http': 'http://127.0.0.1:8000', 'https': 'https://127.0.0.1:8000', })
+>>> resp = simplefetch.get("http://localhost:8800" , proxy={ 'http': 'http://127.0.0.1:8000', 'https': 'https://127.0.0.1:8000', })
 >>>
 ```
 
+## Upload file
+
+```python
+>>>
+>>>
+```
 
