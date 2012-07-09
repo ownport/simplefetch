@@ -84,9 +84,28 @@ Another HTTP requests are also very simple
 
 ### Request (universal method for all HTTP requests) 
 
+In case GET method the request will be the next
+
 ```python
 >>> resp = simplefetch.request(method="GET", url="http://localhost:8800")
 >>>
+```
+
+```python
+def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+            files={}, length_limit=None, proxy = None):
+            
+    ''' request an URL
+    
+    method: HTTP method, one of HEAD, GET, POST, DELETE,  OPTIONS, PUT, TRACE. GET is used by default.
+    url: URL to be requested.
+    headers: HTTP request headers
+    timeout: timeout in seconds, socket._GLOBAL_DEFAULT_TIMEOUT by default
+    files: files to be sended
+    length_limit: if None, no limits on content length, if the limit reached raised ContentLengthLimitException 
+    
+    returns Response object
+    '''
 ```
 
 
