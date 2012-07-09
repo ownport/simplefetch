@@ -312,25 +312,24 @@ class Response(object):
         ''' delete Response object '''
         self.close()        
 
+class Request(object):
+    ''' class Request '''
+    pass
+
 # TODO review if Request class will be more useful for working with requests
 def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
             files={}, length_limit=None, proxy = None):
             
     ''' request an URL
     
-    :param url: URL to be fetched.
-    :type url: string
-    :param method: HTTP method, one of ``GET``, ``DELETE``, ``HEAD``, ``OPTIONS``, ``PUT``, ``POST``, ``TRACE``, ``PATCH``. ``GET`` by default.
-    :type method: string, optional
-    :param headers: HTTP request headers
-    :type headers: dict, optional
-    :param timeout: timeout in seconds, socket._GLOBAL_DEFAULT_TIMEOUT by default
-    :type timeout: integer or float, optional
-    :param files: files to be sended
-    :type files: dict, optional
-    :param length_limit: if ``None``, no limits on content length, if the limit reached raised ContentLengthLimitException 
-    :type length_limit: integer or None, default is ``none``
-    :rtype: A :class:`~simplefetch.Response` object
+    method: HTTP method, one of HEAD, GET, POST, DELETE,  OPTIONS, PUT, TRACE. GET is used by default.
+    url: URL to be requested.
+    headers: HTTP request headers
+    timeout: timeout in seconds, socket._GLOBAL_DEFAULT_TIMEOUT by default
+    files: files to be sended
+    length_limit: if None, no limits on content length, if the limit reached raised ContentLengthLimitException 
+    
+    returns Response object
     '''
 
     # TODO add proxy support    
