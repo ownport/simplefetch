@@ -16,7 +16,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 tests = [i[:-3] for i in os.listdir(os.path.dirname(os.path.abspath(__file__))) 
         if i.startswith('test_') and i.endswith('.py')]
 
+tests_logfile = 'tests.log'
+logfile = open(tests_logfile, 'w')
+
 suite = unittest.defaultTestLoader.loadTestsFromNames(tests)
-result = unittest.TextTestRunner(verbosity=2).run(suite)
+result = unittest.TextTestRunner(logfile, verbosity=2).run(suite)
 
 sys.exit(1 if result.errors or result.failures else 0)
