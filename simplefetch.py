@@ -109,6 +109,10 @@ class UnsupportedMethodException(Exception):
 class UnsupportedProtocolException(Exception): 
     ''' Protocol is not supported '''    
     pass
+    
+class ConnectionRefused(Exception):
+    ''' Connection refused from remote site '''    
+    pass
 
 def cookie2str(cookie):
     # TODO make cookie2str as part of Headers class
