@@ -19,6 +19,16 @@ This file is specification but it is doctest for simplefetch library as well. To
 $ python -m doctest -v tests/specs.md
 ```
 
+Before running doctests the test server should be up and running
+```sh
+$ python tests/server.py
+```
+
+The test server can be started as service/daemon (not implemented yet)
+```sh
+$ python tests/server.py -d -l tests/server.log
+```
+
 ## Simple usage
 
 ### GET method
