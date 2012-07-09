@@ -1,8 +1,21 @@
 # SimpleFecth specification
 
-Simple HTTP client.
+## Introduction
 
-This file is specification but doctest for simplefetch library as well. To run tests 
+SimpleFetch is a python module for downloading content (HEAD, GET methods) but another HTTP methods are supported as well. To use Simpleetch, you will need Python 2.6 or later (Python 3 is not tested yet). Simplefetch is not meant to run standalone; it is a module for you to use as part of a larger Python program.
+
+Simplefetch is easy to use; the module is self-contained in a single file, simplefetch.py, and it has several functions for making different HTTP requests. 
+
+Simplefetch code is adapted, simplified, refactored part of the next libraries: 
+ - [Universal Feed Parser project](http://packages.python.org/feedparser/). Some of the code and texts for documentation was taken from this project. 
+ - [lyxint/urlfetch](https://github.com/lyxint/urlfetch)
+ - [kennethreitz/requests](https://github.com/kennethreitz/requests)
+ - [shazow/urllib3](https://github.com/shazow/urllib3)
+
+
+## Testing
+
+This file is specification but it is doctest for simplefetch library as well. To run tests 
 ```sh
 $ python -m doctest -v tests/specs.md
 ```
