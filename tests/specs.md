@@ -1,6 +1,11 @@
 # SimpleFecth specification
 
-Simple HTTP client
+Simple HTTP client.
+
+This file is specification but doctest for simplefetch library as well. To run tests 
+```sh
+$ python -m doctest -v tests/specs.md
+```
 
 ## GET method
 
@@ -27,7 +32,7 @@ Simple HTTP client
 ## Fetch 
 
 ```python
->>> resp = simplefetch.fetch(method="GET", url="http://localhost:8800")
+>>> resp = simplefetch.request(method="GET", url="http://localhost:8800")
 >>>
 ```
 
