@@ -110,8 +110,8 @@ class UnsupportedProtocolException(Exception):
     ''' Protocol is not supported '''    
     pass
     
-class ConnectionRefused(Exception):
-    ''' Connection refused from remote site '''    
+class ConnectionRequestException(Exception):
+    ''' Connection request exception '''    
     pass
 
 def cookie2str(cookie):
@@ -378,8 +378,11 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
 
     for k, v in headers.items():
         reqheaders[k.title()] = v 
-    
-    h.request(method, requrl, data, reqheaders)
+
+    try:
+        h.request(method, requrl, data, reqheaders)
+    except socket.error, err:
+        raise ConnectionRequestException(err)
     response = h.getresponse()
     return Response(response, reqheaders=reqheaders, connection=h, length_limit=length_limit)
 
