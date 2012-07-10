@@ -24,7 +24,7 @@ try:
 except IndexError:
     pass
 
-import bottle
+from packages import bottle
 
 app = bottle.app()
 
