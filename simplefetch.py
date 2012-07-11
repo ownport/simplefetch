@@ -94,6 +94,10 @@ _ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", 
 #   Exceptions
 #
 
+class IncorrectURLError(Exception):
+    ''' Incorrect URL exception '''
+    pass
+
 class IncorrectFilename(Exception): 
     ''' Incorrect filename exception '''
     pass
@@ -247,53 +251,79 @@ class Request(object):
                     proxy = {'http': 'http://192.168.1.1:8800', 'https': 'http://192.168.1.1:8800'}
         '''
         
+        # handle situation when url is not defined
+        if not url:
+            raise IncorrectURLError(url)
+        
         self._scheme, self._netloc, self._path, self._query, self._fragment = urlparse.urlsplit(url)
         self._method = method.upper()
         if self._method not in _ALLOWED_METHODS:
-            raise UnsupportedMethodException("Method should be one of " + ", ".join(_allowed_methods))
+            raise UnsupportedMethodException(self._method)
             
-        requrl = path
-        if query: requrl += '?' + query
+        requrl = self._path
+        if self._query: requrl += '?' + self._query
         # do not add fragment
         #if fragment: requrl += '#' + fragment
         
         # handle 'Host'
-        if ':' in netloc:
-            host, port = netloc.rsplit(':', 1)
+        if ':' in self._netloc:
+            host, port = self._netloc.rsplit(':', 1)
             port = int(port)
         else:
-            host, port = netloc, None
+            host, port = self._netloc, None
         host = host.encode('idna').decode('utf-8')
         
-        if scheme == 'https':
-            h = HTTPSConnection(host, port=port, timeout=timeout)
+        if self._scheme == 'https':
+            self._conn = HTTPSConnection(host, port=port, timeout=timeout)
         elif scheme == 'http':
-            h = HTTPConnection(host, port=port, timeout=timeout)
+            self._conn = HTTPConnection(host, port=port, timeout=timeout)
         else:
-            raise UnsupportedProtocolException('Unsupported protocol %s' % scheme)
-            s
+            raise UnsupportedProtocolException('Unsupported protocol %s' % self._scheme)
+
         # default request headers
-        reqheaders = Headers().items()
+        self._headers = Headers()
+        
+        # data
+        self._data = None
     
     def set_headers(self, headers={}):
         ''' set headers '''
-        pass
+        for k, v in headers.items():
+            self._headers.put(k, v) 
     
     def set_data(self, data=None):
         ''' set data '''
-        pass
+        self._data = data
 
     def set_files(self, files={}):
         ''' set files '''
-        pass
+        if files:
+            content_type, self._data = _encode_multipart(data, files)
+            self._headers.put('Content-Type', content_type)
+        elif isinstance(data, dict):
+            self._data = urlencode(data, 1)
+            
+        if isinstance(self._data, basestring) and not files:
+            # httplib will set 'Content-Length', also you can set it by yourself
+            reqheaders["Content-Type"] = "application/x-www-form-urlencoded"
+            # what if the method is GET, HEAD or DELETE 
+            # just do not make so much decisions for users
         
     def set_content_limit(self, limit):
         ''' set content length limit '''
-        pass
+        self._length_limit = int(limit)
     
     def send(self):
-        ''' send request to server '''
-        pass
+        ''' send request to server 
+        
+        return Response object
+        '''
+        try:
+            self._conn.request(self._method, self._requrl, self._data, self._headers.dump())
+        except socket.error, err:
+            raise ConnectionRequestException(err)
+        response = self._conn.getresponse()
+        return Response(response, reqheaders=self._headers.dump(), connection=self._conn, length_limit=self._length_limit)
 
 class Response(object):
     '''
