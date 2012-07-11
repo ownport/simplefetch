@@ -225,10 +225,39 @@ class Headers(object):
         ''' add new parameter to headers '''
         self.__headers[k.title()] = v
     
-    # TODO rename method items() to dump()
+    # TODO  rename method items() to dump() with support defferent formats 
+    #       like dict, list/tuple, json, ...
     def items(self):
         ''' return headers dictionary '''
         return self.__headers
+
+class Request(object):
+    ''' class Request '''
+
+    # TODO add proxy support    
+    # TODO even if proxy is not defined -> check environment (http_proxy, htts_proxy)
+    def __init__(url, method="GET", timeout=socket._GLOBAL_DEFAULT_TIMEOUT, length_limit=None)
+        pass
+    
+    def set_headers(self, headers={}):
+        ''' set headers '''
+        pass
+    
+    def set_data(self, data=None):
+        ''' set data '''
+        pass
+
+    def set_files(self, files={}):
+        ''' set files '''
+        pass
+    
+    def set_proxy(self, proxy=None):
+        ''' set proxy '''
+        pass
+    
+    def get_response(self):
+        ''' get response '''
+        pass
 
 class Response(object):
     '''
@@ -312,11 +341,7 @@ class Response(object):
         ''' delete Response object '''
         self.close()        
 
-class Request(object):
-    ''' class Request '''
-    pass
 
-# TODO review if Request class will be more useful for working with requests
 def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
             files={}, length_limit=None, proxy = None):
             
@@ -332,13 +357,10 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     returns Response object
     '''
 
-    # TODO add proxy support    
-    # TODO even if proxy is not defined -> check environment (http_proxy, htts_proxy)
-    
     scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
     method = method.upper()
     if method not in _allowed_methods:
-        raise UnsupportedMethodException("Method shoud be one of " + ", ".join(_allowed_methods))
+        raise UnsupportedMethodException("Method should be one of " + ", ".join(_allowed_methods))
 
     requrl = path
     if query: requrl += '?' + query
