@@ -88,7 +88,7 @@ __all__ = [
     'Headers', 'Request', 'Response', 'Session',
 ] 
 
-_allowed_methods = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
+_ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
 
 #
 #   Exceptions
@@ -236,8 +236,44 @@ class Request(object):
 
     # TODO add proxy support    
     # TODO even if proxy is not defined -> check environment (http_proxy, htts_proxy)
-    def __init__(url, method="GET", timeout=socket._GLOBAL_DEFAULT_TIMEOUT, length_limit=None)
-        pass
+    def __init__(url, method="GET", timeout=socket._GLOBAL_DEFAULT_TIMEOUT, proxy=None):
+        ''' initial definitions 
+        
+        url:        URL to be requested
+        method:     HTTP method, one of HEAD, GET, POST, DELETE,  OPTIONS, PUT, TRACE. GET is used by default.
+        timeout:    timeout in seconds, socket._GLOBAL_DEFAULT_TIMEOUT by default
+        proxy:      http/https proxy parameters. if None, it will be checked system environment HTTP/S_PROXY
+                    parameters. Example of defined proxy parameters: 
+                    proxy = {'http': 'http://192.168.1.1:8800', 'https': 'http://192.168.1.1:8800'}
+        '''
+        
+        self._scheme, self._netloc, self._path, self._query, self._fragment = urlparse.urlsplit(url)
+        self._method = method.upper()
+        if self._method not in _ALLOWED_METHODS:
+            raise UnsupportedMethodException("Method should be one of " + ", ".join(_allowed_methods))
+            
+        requrl = path
+        if query: requrl += '?' + query
+        # do not add fragment
+        #if fragment: requrl += '#' + fragment
+        
+        # handle 'Host'
+        if ':' in netloc:
+            host, port = netloc.rsplit(':', 1)
+            port = int(port)
+        else:
+            host, port = netloc, None
+        host = host.encode('idna').decode('utf-8')
+        
+        if scheme == 'https':
+            h = HTTPSConnection(host, port=port, timeout=timeout)
+        elif scheme == 'http':
+            h = HTTPConnection(host, port=port, timeout=timeout)
+        else:
+            raise UnsupportedProtocolException('Unsupported protocol %s' % scheme)
+            s
+        # default request headers
+        reqheaders = Headers().items()
     
     def set_headers(self, headers={}):
         ''' set headers '''
@@ -250,13 +286,13 @@ class Request(object):
     def set_files(self, files={}):
         ''' set files '''
         pass
-    
-    def set_proxy(self, proxy=None):
-        ''' set proxy '''
+        
+    def set_content_limit(self, limit):
+        ''' set content length limit '''
         pass
     
-    def get_response(self):
-        ''' get response '''
+    def send(self):
+        ''' send request to server '''
         pass
 
 class Response(object):
@@ -359,8 +395,8 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
 
     scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
     method = method.upper()
-    if method not in _allowed_methods:
-        raise UnsupportedMethodException("Method should be one of " + ", ".join(_allowed_methods))
+    if method not in _ALLOWED_METHODS:
+        raise UnsupportedMethodException("Method should be one of " + ", ".join(_ALLOWED_METHODS))
 
     requrl = path
     if query: requrl += '?' + query
@@ -381,7 +417,6 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
         h = HTTPConnection(host, port=port, timeout=timeout)
     else:
         raise UnsupportedProtocolException('Unsupported protocol %s' % scheme)
-        s
     # default request headers
     reqheaders = Headers().items()
     
