@@ -3,6 +3,7 @@
 This class is used to prepare parameters before send request to server. Only URL parameter is mandatory. If method is not defined by default will be used GET method.
 
 ```python
+>>> import simplefetch
 >>> req = Request(url)
 >>> 
 ```
@@ -27,4 +28,24 @@ For sending request you need to use send() method
 ```
 as result Response object will be returned
 
+
+### Proxy (how to use it with httplib)
+
+Example of usage proxy with httplib
+
+To get HTTP/S_PROXY details from environment
+
+```python
+import os
+_env = dict((k.lower(),v) for k,v in os.environ.items())
+http_proxy = _env.get('http_proxy', None)
+https_proxy = _env.get('https_proxy', None)
+
+h1 = httplib.HTTPConnection(http_proxy, http_proxy_port)
+h1.request("GET", "http://www.python.org/")
+
+h1 = httplib.HTTPConnection(https_proxy, https_proxy_port)
+h1.request("GET", "https://www.python.org/")
+```
+Note: host and port should be splitted for proxy
 
