@@ -49,3 +49,8 @@ h1.request("GET", "https://www.python.org/")
 ```
 Note: host and port should be splitted for proxy
 
+Links
+
+ * (Using httplib through a Proxy)[http://www.pha.com.au/kb/index.php/Using_httplib_through_a_Proxy]
+ * (simplest useful HTTPS with basic proxy authentication (Python recipe))[http://code.activestate.com/recipes/301740-simplest-useful-https-with-basic-proxy-authenticat/]
+
