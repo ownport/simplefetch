@@ -8,10 +8,19 @@ This class is used to prepare parameters before send request to server. Only URL
 ```
 
 ```python
-Request(url, method="GET", timeout=socket._GLOBAL_DEFAULT_TIMEOUT, length_limit=None)
+Request(url, method="GET", timeout=socket._GLOBAL_DEFAULT_TIMEOUT, proxy=None):
+    ''' initial definitions 
+        
+    url:        URL to be requested
+    method:     HTTP method, one of HEAD, GET, POST, DELETE,  OPTIONS, PUT, TRACE. GET is used by default.
+    timeout:    timeout in seconds, socket._GLOBAL_DEFAULT_TIMEOUT by default
+    proxy:      http/https proxy parameters. if None, it will be checked system environment HTTP/S_PROXY
+                parameters. Example of defined proxy parameters: 
+                proxy = {'http': 'http://192.168.1.1:8800', 'https': 'http://192.168.1.1:8800'}
+    '''
 ```
 
-For sending request you need to use send() function
+For sending request you need to use send() method
 ```python
 >>> req = Request(url)
 >>> resp = req.send()
