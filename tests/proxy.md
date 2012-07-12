@@ -26,12 +26,16 @@ $ export https_proxy=https://127.0.0.1:8080
 'https://127.0.0.1:8080'
 ```
 
-The format of http and https arguments is "<scheme>://[<username>:<password>]@<host>:<port>/"
+The format of http and https arguments is "scheme://[username:password]@host:port/"
 
 scheme - http or https
+
 host - proxy hostname
+
 port - proxy port
+
 username - optional parameter, if login is required
+
 password - optional parameter, if login is required
 
 
@@ -57,6 +61,6 @@ Note: host and port should be splitted for proxy
 
 Links
 
- * (Using httplib through a Proxy)[http://www.pha.com.au/kb/index.php/Using_httplib_through_a_Proxy]
- * (simplest useful HTTPS with basic proxy authentication (Python recipe))[http://code.activestate.com/recipes/301740-simplest-useful-https-with-basic-proxy-authenticat/]
+ * [Using httplib through a Proxy](http://www.pha.com.au/kb/index.php/Using_httplib_through_a_Proxy)
+ * [simplest useful HTTPS with basic proxy authentication (Python recipe)](http://code.activestate.com/recipes/301740-simplest-useful-https-with-basic-proxy-authenticat/)
 
