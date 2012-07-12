@@ -118,26 +118,68 @@ class ConnectionRequestException(Exception):
     ''' Connection request exception '''    
     pass
 
+class IncorrectProxyException(Exception):
+    ''' Incorrect Proxy Exception '''
+    pass
 
-# TODO specify Proxy class
+#
+#   Classes
+#
+
 class Proxy(object):
     ''' proxy connection '''
-    def __init__(self, http=None, https=None):
-        ''' initial '''
-        self._http_host, self._http_port = self._get_host_port(http)
-        self._https_host, self._https_port = self._get_host_port(https)
-        
-    def _get_host_port(url):
-        ''' get host & port '''
-        return None, None
     
+    # TODO add proxy authentication <scheme>://<username>:<password>@<host>:<port> 
+    
+    def __init__(self, http_proxy=None, https_proxy=None):
+        ''' initial '''
+        
+        self.__conns = {'http': None, 'https': None}
+        
+        self._http_proxy = None
+        self._https_proxy = None
+        
+        if not http_proxy:
+            http_proxy = self._get_env('http_proxy')
+        if not https_proxy:
+            https_proxy = self._get_env('https_proxy')
+            
+        if http_proxy:
+            parsed_url = parse_url(http_proxy)
+            if parsed_url['scheme'] <> 'http':
+                raise IncorrectProxyException(http_proxy)
+            self._http_proxy = (parsed_url['host'], parsed_url['port'])
+            
+        if https_proxy:
+            parsed_url = parse_url(https_proxy)
+            if parsed_url['scheme'] <> 'https':
+                raise IncorrectProxyException(https_proxy)
+            self._https_proxy = (parsed_url['host'], parsed_url['port'])
+            
     def connect(self):
         ''' open connection '''
         pass
-
+        
     def disconnect(self):
         ''' close connection '''        
         pass
+
+    def _get_env(self, param):
+        ''' get variable from system environment'''
+        _env = dict((k.lower(),v) for k,v in os.environ.items())
+        return _env.get(param.lower(), None)
+
+    @property
+    def http_proxy(self):
+        return self._http_proxy
+
+    @property
+    def https_proxy(self):
+        return self._https_proxy
+
+    def is_connected(self):
+        ''' return True if proxy connection is established '''
+        return self.__conn
 
 class Headers(object):
     ''' Headers
@@ -206,10 +248,10 @@ class Request(object):
             host, port = self._netloc, None
         host = host.encode('idna').decode('utf-8')
         
-        if self._scheme == 'https':
-            self._conn = HTTPSConnection(host, port=port, timeout=timeout)
-        elif scheme == 'http':
+        if scheme == 'http':
             self._conn = HTTPConnection(host, port=port, timeout=timeout)
+        elif self._scheme == 'https':
+            self._conn = HTTPSConnection(host, port=port, timeout=timeout)
         else:
             raise UnsupportedProtocolException('Unsupported protocol %s' % self._scheme)
 
@@ -365,10 +407,10 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
 
     parsed_url = parse_url(url)
     
-    if parsed_url['scheme'] == 'https':
-        h = HTTPSConnection(parsed_url['host'], port=parsed_url['port'], timeout=timeout)
-    elif parsed_url['scheme'] == 'http':
+    if parsed_url['scheme'] == 'http':
         h = HTTPConnection(parsed_url['host'], port=parsed_url['port'], timeout=timeout)
+    elif parsed_url['scheme'] == 'https':
+        h = HTTPSConnection(parsed_url['host'], port=parsed_url['port'], timeout=timeout)
     else:
         raise UnsupportedProtocolException('Unsupported protocol %s' % scheme)
     # default request headers
@@ -412,9 +454,10 @@ patch = partial(request, method="PATCH")
 def parse_url(url):
     ''' returns dictionary of parsed url 
     
-    scheme, host, port, 
-    
+    scheme, host, port, query
     '''
+    # TODO add extraction username and password from url, for example: http://username:password@host:port/
+    
     result = {'scheme': None, 'host': None, 'port': None, 'query': None, }
     _scheme, _netloc, _path, _params, _query, _fragment = urlparse.urlparse(url)
     

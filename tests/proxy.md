@@ -4,14 +4,15 @@ The class Proxy allows to make easy requests via HTTP/S proxies
 
 ```python
 >>> import simplefetch
->>> proxy = Proxy(http='http://127.0.0.1:8080', https='https://127.0.0.1:8080')
->>> proxy.http
-'http://127.0.0.1:8080'
->>> proxy.https
-'https://127.0.0.1:8080'
+>>> proxy = simplefetch.Proxy(http_proxy='http://127.0.0.1:8080', https_proxy='https://127.0.0.1:8080')
+>>> proxy.http_proxy
+(u'127.0.0.1', 8080)
+>>> proxy.https_proxy
+(u'127.0.0.1', 8080)
+
 ```
 
-In case when http and https arguments are not defined Proxy try to get information from system environment, HTTP_PROXY and HTTPS_PROXY
+In case when http_proxy or https_proxy arguments are not defined Proxy try to get information from system environment, HTTP_PROXY and HTTPS_PROXY
 
 ```sh
 $ export http_proxy=http://127.0.0.1:8080
@@ -19,11 +20,12 @@ $ export https_proxy=https://127.0.0.1:8080
 ```
 
 ```python
->>> proxy = Proxy()
->>> proxy.http
-'http://127.0.0.1:8080'
->>> proxy.https
-'https://127.0.0.1:8080'
+>>> proxy = simplefetch.Proxy()
+>>> proxy.http_proxy
+(u'127.0.0.1', 8080)
+>>> proxy.https_proxy
+(u'127.0.0.1', 8080)
+
 ```
 
 The format of http and https arguments is "scheme://[username:password]@host:port/"
