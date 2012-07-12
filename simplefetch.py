@@ -340,6 +340,9 @@ class Response(object):
         ''' delete Response object '''
         self.close()        
 
+#
+#   Helpers
+#
 
 def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
             files={}, length_limit=None, proxy = None):
@@ -356,28 +359,16 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
     returns Response object
     '''
 
-    scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
     method = method.upper()
     if method not in _ALLOWED_METHODS:
         raise UnsupportedMethodException("Method should be one of " + ", ".join(_ALLOWED_METHODS))
 
-    requrl = path
-    if query: requrl += '?' + query
-    # do not add fragment
-    #if fragment: requrl += '#' + fragment
+    parsed_url = parse_url(url)
     
-    # handle 'Host'
-    if ':' in netloc:
-        host, port = netloc.rsplit(':', 1)
-        port = int(port)
-    else:
-        host, port = netloc, None
-    host = host.encode('idna').decode('utf-8')
-    
-    if scheme == 'https':
-        h = HTTPSConnection(host, port=port, timeout=timeout)
-    elif scheme == 'http':
-        h = HTTPConnection(host, port=port, timeout=timeout)
+    if parsed_url['scheme'] == 'https':
+        h = HTTPSConnection(parsed_url['host'], port=parsed_url['port'], timeout=timeout)
+    elif parsed_url['scheme'] == 'http':
+        h = HTTPConnection(parsed_url['host'], port=parsed_url['port'], timeout=timeout)
     else:
         raise UnsupportedProtocolException('Unsupported protocol %s' % scheme)
     # default request headers
@@ -399,11 +390,12 @@ def request(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEF
         reqheaders[k.title()] = v 
 
     try:
-        h.request(method, requrl, data, reqheaders)
+        h.request(method, parsed_url['query'], data, reqheaders)
     except socket.error, err:
         raise ConnectionRequestException(err)
     response = h.getresponse()
     return Response(response, reqheaders=reqheaders, connection=h, length_limit=length_limit)
+
 
 # TODO if class Request is used, make new shortcuts 
 # some shortcuts
@@ -417,9 +409,6 @@ options = partial(request, method="OPTIONS")
 trace = partial(request, method="TRACE", files={}, data=None)
 patch = partial(request, method="PATCH")
 
-#
-#   Helpers
-#
 def parse_url(url):
     ''' returns dictionary of parsed url 
     
