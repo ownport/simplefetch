@@ -26,6 +26,15 @@ $ export https_proxy=https://127.0.0.1:8080
 'https://127.0.0.1:8080'
 ```
 
+The format of http and https arguments is "<scheme>://[<username>:<password>]@<host>:<port>/"
+
+scheme - http or https
+host - proxy hostname
+port - proxy port
+username - optional parameter, if login is required
+password - optional parameter, if login is required
+
+
 ### Proxy (how to use it with httplib)
 
 Example of usage proxy with httplib
