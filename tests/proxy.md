@@ -57,6 +57,17 @@ h1.request("GET", "https://www.python.org/")
 ```
 Note: host and port should be splitted for proxy
 
+### Proxy authentication
+
+```python
+''' https://github.com/kennethreitz/requests/blob/develop/requests/auth.py '''
+def _basic_auth_str(username, password):
+    """Returns a Basic Auth string."""
+    return 'Basic ' + b64encode(('%s:%s' % (username, password)).encode('latin1')).strip().decode('latin1')
+
+headers['Proxy-Authorization'] = _basic_auth_str(self.username, self.password)
+```
+
 Links
 
  * [Using httplib through a Proxy](http://www.pha.com.au/kb/index.php/Using_httplib_through_a_Proxy)

@@ -9,7 +9,7 @@
 #   license: BSD 2-clause License, see LICENSE for details.
 
 
-__version__ = '0.1'
+__version__ = '0.2.0'
 __author__ = 'Andrey Usov <http://devel.ownport.net>'
 __url__ = 'https://github.com/ownport/simplefetch'
 __license__ = '''
@@ -155,6 +155,11 @@ class Proxy(object):
             if parsed_url['scheme'] <> 'https':
                 raise IncorrectProxyException(https_proxy)
             self._https_proxy = (parsed_url['host'], parsed_url['port'])
+
+    def _get_env(self, param):
+        ''' get variable from system environment'''
+        _env = dict((k.lower(),v) for k,v in os.environ.items())
+        return _env.get(param.lower(), None)
             
     def connect(self):
         ''' open connection '''
@@ -164,10 +169,13 @@ class Proxy(object):
         ''' close connection '''        
         pass
 
-    def _get_env(self, param):
-        ''' get variable from system environment'''
-        _env = dict((k.lower(),v) for k,v in os.environ.items())
-        return _env.get(param.lower(), None)
+    def request(self):
+        # TODO
+        pass
+
+    def getresponse(self):
+        # TODO
+        pass
 
     @property
     def http_proxy(self):
