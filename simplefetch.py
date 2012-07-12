@@ -93,7 +93,7 @@ class Body(object):
 class Connection(object):
     ''' HTTP/S Connection '''
     
-    def __init__(self, conn_type='http', host, port, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+    def __init__(self, conn_type='http', host=None, port=0, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         pass
 
     def request(self, method, url, body, headers):
@@ -109,11 +109,14 @@ class Connection(object):
 def parse_url(url):
     ''' returns dictionary of parsed url 
     
-    scheme, host, port, query
+    username, password, scheme, host, port, query
     '''
-    # TODO add extraction username and password from url, for example: http://username:password@host:port/
-    
-    result = {'scheme': None, 'host': None, 'port': None, 'query': None, }
+    # TODO add extraction username and password from url, for example: http://username:password@host:port/    
+    result = {
+                'username': None, 'password': None, 
+                'scheme': None, 'host': None, 'port': None, 
+                'query': None, 
+            }
     _scheme, _netloc, _path, _params, _query, _fragment = urlparse.urlparse(url)
     
     result['scheme'] = _scheme
