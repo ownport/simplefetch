@@ -118,93 +118,26 @@ class ConnectionRequestException(Exception):
     ''' Connection request exception '''    
     pass
 
-def cookie2str(cookie):
-    # TODO make cookie2str as part of Headers class
-    '''
-    Convert Set-Cookie header to cookie string.
-    '''
-    c = Cookie.SimpleCookie(sc)
-    sc = ['%s=%s' % (i.key, i.value) for i in c.itervalues()]
-    return '; '.join(sc)
 
-
-_boundary_prefix = None
-def choose_boundary():
-    '''
-    Generate a multipart boundry.
-    '''
+# TODO specify Proxy class
+class Proxy(object):
+    ''' proxy connection '''
+    def __init__(self, http=None, https=None):
+        ''' initial '''
+        self._http_host, self._http_port = self._get_host_port(http)
+        self._https_host, self._https_port = self._get_host_port(https)
+        
+    def _get_host_port(url):
+        ''' get host & port '''
+        return None, None
     
-    global _boundary_prefix
-    if _boundary_prefix is None:
-        _boundary_prefix = "simplefetch"
-        import os
-        try:
-            uid = repr(os.getuid())
-            _boundary_prefix += "." + uid
-        except AttributeError: pass
-        try:
-            pid = repr(os.getpid())
-            _boundary_prefix += "." + pid
-        except AttributeError: pass
-    import uuid
-    return "(*^__^*)%s.%s" % (_boundary_prefix, uuid.uuid4().hex)
+    def connect(self):
+        ''' open connection '''
+        pass
 
-def _encode_multipart(data, files):
-    '''
-    Encode multipart.
-    '''
-    
-    body = BytesIO()
-    boundary = choose_boundary()
-    part_boundary = b('--%s\r\n' % boundary)
-
-    if isinstance(data, dict):
-        for name, value in data.items():
-            body.write(part_boundary)
-            writer(body).write('Content-Disposition: form-data; name="%s"\r\n' % name)
-            body.write(b'Content-Type: text/plain\r\n\r\n')
-            if py3k and isinstance(value, str): 
-                writer(body).write(value)
-            else:
-                body.write(value)
-            body.write(b'\r\n')
-            
-    for fieldname, f in files.items():
-        if isinstance(f, tuple):
-            filename, f = f
-        elif hasattr(f, 'name'):
-            filename = os.path.basename(f.name)
-        else:
-            filename = None
-            raise IncorrectFilename("file must has filename")
-
-        if hasattr(f, 'read'):
-            value = f.read()
-        elif isinstance(f, basestring):
-            value = f
-        else:
-            value = str(f)
-
-        body.write(part_boundary)
-        if filename:
-            writer(body).write('Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (fieldname, filename))
-            body.write(b'Content-Type: application/octet-stream\r\n\r\n')
-        else:
-            writer(body).write('Content-Disposition: form-data; name="%s"\r\n' % name)
-            body.write(b'Content-Type: text/plain\r\n\r\n')
-
-        if py3k and isinstance(value, str):
-            writer(body).write(value)
-        else:
-            body.write(value)
-        body.write(b'\r\n')
-
-    body.write(b('--' + boundary + '--\r\n'))
-
-    content_type = 'multipart/form-data; boundary=%s' % boundary
-    #body.write(b(content_type))
-
-    return content_type, body.getvalue()
+    def disconnect(self):
+        ''' close connection '''        
+        pass
 
 class Headers(object):
     ''' Headers
@@ -483,4 +416,117 @@ options = partial(request, method="OPTIONS")
 # No entity body can be sent with a TRACE request. 
 trace = partial(request, method="TRACE", files={}, data=None)
 patch = partial(request, method="PATCH")
+
+#
+#   Helpers
+#
+def parse_url(url):
+    ''' returns dictionary of parsed url 
+    
+    scheme, host, port, 
+    
+    '''
+    result = {'scheme': None, 'host': None, 'port': None, 'query': None, }
+    _scheme, _netloc, _path, _params, _query, _fragment = urlparse.urlparse(url)
+    
+    result['scheme'] = _scheme
+    result['query'] = _path
+    if _query: result['query'] += '?' + _query
+    
+    # handle 'Host'
+    if ':' in _netloc:
+        result['host'], result['port'] = _netloc.rsplit(':', 1)
+        result['port'] = int(result['port'])
+    else:
+        result['host'], result['port'] = _netloc, None
+    result['host'] = result['host'].encode('idna').decode('utf-8')
+    
+    return result
+
+def cookie2str(cookie):
+    # TODO make cookie2str as part of Headers class
+    '''
+    Convert Set-Cookie header to cookie string.
+    '''
+    c = Cookie.SimpleCookie(sc)
+    sc = ['%s=%s' % (i.key, i.value) for i in c.itervalues()]
+    return '; '.join(sc)
+
+_boundary_prefix = None
+def choose_boundary():
+    '''
+    Generate a multipart boundry.
+    '''
+    
+    global _boundary_prefix
+    if _boundary_prefix is None:
+        _boundary_prefix = "simplefetch"
+        import os
+        try:
+            uid = repr(os.getuid())
+            _boundary_prefix += "." + uid
+        except AttributeError: pass
+        try:
+            pid = repr(os.getpid())
+            _boundary_prefix += "." + pid
+        except AttributeError: pass
+    import uuid
+    return "(*^__^*)%s.%s" % (_boundary_prefix, uuid.uuid4().hex)
+
+def _encode_multipart(data, files):
+    '''
+    Encode multipart.
+    '''
+    
+    body = BytesIO()
+    boundary = choose_boundary()
+    part_boundary = b('--%s\r\n' % boundary)
+
+    if isinstance(data, dict):
+        for name, value in data.items():
+            body.write(part_boundary)
+            writer(body).write('Content-Disposition: form-data; name="%s"\r\n' % name)
+            body.write(b'Content-Type: text/plain\r\n\r\n')
+            if py3k and isinstance(value, str): 
+                writer(body).write(value)
+            else:
+                body.write(value)
+            body.write(b'\r\n')
+            
+    for fieldname, f in files.items():
+        if isinstance(f, tuple):
+            filename, f = f
+        elif hasattr(f, 'name'):
+            filename = os.path.basename(f.name)
+        else:
+            filename = None
+            raise IncorrectFilename("file must has filename")
+
+        if hasattr(f, 'read'):
+            value = f.read()
+        elif isinstance(f, basestring):
+            value = f
+        else:
+            value = str(f)
+
+        body.write(part_boundary)
+        if filename:
+            writer(body).write('Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (fieldname, filename))
+            body.write(b'Content-Type: application/octet-stream\r\n\r\n')
+        else:
+            writer(body).write('Content-Disposition: form-data; name="%s"\r\n' % name)
+            body.write(b'Content-Type: text/plain\r\n\r\n')
+
+        if py3k and isinstance(value, str):
+            writer(body).write(value)
+        else:
+            body.write(value)
+        body.write(b'\r\n')
+
+    body.write(b('--' + boundary + '--\r\n'))
+
+    content_type = 'multipart/form-data; boundary=%s' % boundary
+    #body.write(b(content_type))
+
+    return content_type, body.getvalue()
 
