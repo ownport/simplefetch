@@ -74,6 +74,10 @@ from io import BytesIO
 from functools import partial
 
 _ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
+_PROXIES = {
+    'http': _get_env('http_proxy'),
+    'https': _get_env('https_proxy'),
+}
 
 #
 #   Exceptions
@@ -190,71 +194,6 @@ class Response(object):
             self.__content = content
         return self.__content
 
-
-class Proxy(object):
-    ''' proxy connection '''
-    
-    # TODO add proxy authentication <scheme>://<username>:<password>@<host>:<port> 
-    
-    def __init__(self, http_proxy=None, https_proxy=None):
-        ''' initial '''
-        
-        self.__conns = {'http': None, 'https': None}
-        
-        self._http_proxy = None
-        self._https_proxy = None
-        
-        if not http_proxy:
-            http_proxy = self._get_env('http_proxy')
-        if not https_proxy:
-            https_proxy = self._get_env('https_proxy')
-            
-        if http_proxy:
-            parsed_url = parse_url(http_proxy)
-            if parsed_url['scheme'] <> 'http':
-                raise IncorrectProxyException(http_proxy)
-            self._http_proxy = (parsed_url['host'], parsed_url['port'])
-            
-        if https_proxy:
-            parsed_url = parse_url(https_proxy)
-            if parsed_url['scheme'] <> 'https':
-                raise IncorrectProxyException(https_proxy)
-            self._https_proxy = (parsed_url['host'], parsed_url['port'])
-
-    def _get_env(self, param):
-        ''' get variable from system environment'''
-        _env = dict((k.lower(),v) for k,v in os.environ.items())
-        return _env.get(param.lower(), None)
-            
-    def connect(self):
-        ''' open connection '''
-        pass
-        
-    def disconnect(self):
-        ''' close connection '''        
-        pass
-
-    def request(self):
-        # TODO
-        pass
-
-    def getresponse(self):
-        # TODO
-        pass
-
-    @property
-    def http_proxy(self):
-        return self._http_proxy
-
-    @property
-    def https_proxy(self):
-        return self._https_proxy
-
-    def is_connected(self):
-        ''' return True if proxy connection is established '''
-        return self.__conn
-
-
 class Connection(object):
     ''' HTTP/S Connection '''
     
@@ -294,7 +233,7 @@ class Connection(object):
 #
 
 def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
-            files={}, length_limit=None, proxy = None):
+            files={}, length_limit=None):
             
     ''' request an URL
     
@@ -369,6 +308,12 @@ def parse_url(url):
     result['host'] = result['host'].encode('idna').decode('utf-8')
     
     return result
+
+def _get_env(self, param):
+    ''' get variable from system environment'''
+    _env = dict((k.lower(),v) for k,v in os.environ.items())
+    return _env.get(param.lower(), None)
+
 
 def cookie2str(cookie):
     # TODO make cookie2str as part of Headers class
