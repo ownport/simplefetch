@@ -39,6 +39,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # TODO review which modules can be removed as unsed
 import os
 import sys
+import zlib
+import gzip
 import socket
 import base64
 
@@ -75,23 +77,10 @@ from functools import partial
 
 _ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
 
-
-#
-#   Proxy definitions
-#
-def _get_env(param_name):
-    ''' get variable from system environment'''
-    _env = dict((k.lower(),v) for k,v in os.environ.items())
-    return _env.get(param_name.lower(), None)
-
-_PROXIES = {
-    'http': _get_env('http_proxy'),
-    'https': _get_env('https_proxy'),
-}
-
 #
 #   Exceptions
 #
+
 class UnknownConnectionTypeException(Exception):
     pass
 
@@ -102,8 +91,24 @@ class ContentLengthLimitException(Exception):
     pass
 
 #
+#   Utils
+#
+
+def decode_gzip(data):
+    gzipper = gzip.GzipFile(fileobj=BytesIO(data))
+    return gzipper.read()
+
+
+def decode_deflate(data):
+    try:
+        return zlib.decompress(data)
+    except zlib.error:
+        return zlib.decompress(data, -zlib.MAX_WBITS)
+
+#
 #   Classes
 #
+
 class Headers(object):
     ''' Headers
     
@@ -157,21 +162,10 @@ class Response(object):
         except:
             self.__content_limit = None
 
-    @property
-    def msg(self):
-        return self.__http_resp.msg
-
-    @property
-    def version(self):
-        return self.__http_resp.version
-
-    @property
-    def status(self):
-        return int(self.__http_resp.status)
-
-    @property
-    def reason(self):
-        return self.__http_resp.reason
+        setattr(self, 'msg', self.__http_resp.msg)
+        setattr(self, 'version', self.__http_resp.version)
+        setattr(self, 'status', self.__http_resp.status)
+        setattr(self, 'reason', self.__http_resp.reason)
     
     @property
     def headers(self):
@@ -209,6 +203,12 @@ class Connection(object):
     
     def __init__(self, conn_type='http', host=None, port=80, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         ''' initial '''
+        
+        # TODO avoid open connection to proxy if requested host is localhost or 127.0.0.1
+        # TODO make config file with exception when proxy is needed
+        if _PROXIES.get(conn_type, None):
+            host = _PROXIES[conn_type].get('host', None)
+            port = _PROXIES[conn_type].get('port', None)
         
         self.__conn = None
         if conn_type == 'http':
@@ -256,12 +256,19 @@ def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAU
     
     returns Response object
     '''
+    via_proxy = False
+    
     method = method.upper()
     if method not in _ALLOWED_METHODS:
         raise UnsupportedMethodException(method)
 
     parsed_url = parse_url(url)
-    conn = Connection(conn_type=parsed_url['scheme'], host=parsed_url['host'], port=parsed_url['port'], timeout=timeout)
+    if _PROXIES.get(parsed_url.get('scheme'), None):
+        proxy_host, proxy_port = _PROXIES[parsed_url.get('scheme')]
+        via_proxy = True
+        conn = Connection(conn_type=parsed_url['scheme'], host=proxy_host, port=proxy_port, timeout=timeout)
+    else:
+        conn = Connection(conn_type=parsed_url['scheme'], host=parsed_url['host'], port=parsed_url['port'], timeout=timeout)
 
     # default request headers
     reqheaders = Headers()
@@ -280,7 +287,10 @@ def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAU
     for k, v in headers.items():
         reqheaders.put(k, v) 
 
-    conn.request(method, parsed_url['query'], data, reqheaders.items())
+    if via_proxy:
+        conn.request(method, url, data, reqheaders.items())
+    else:
+        conn.request(method, parsed_url['query'], data, reqheaders.items())
     return conn.response(content_limit=length_limit)
 
 # TODO if class Request is used, make new shortcuts 
@@ -303,6 +313,10 @@ def parse_url(url):
     '''
     # TODO add extraction username and password from url, for example: http://username:password@host:port/    
     result = dict()
+
+    if not url:
+        return result
+    
     _scheme, _netloc, _path, _params, _query, _fragment = urlparse.urlparse(url)
     
     result['scheme'] = _scheme
@@ -318,6 +332,19 @@ def parse_url(url):
     result['host'] = result['host'].encode('idna').decode('utf-8')
     
     return result
+
+#
+#   Proxy definitions (from system environment)
+#
+def _get_env(param_name):
+    ''' get variable from system environment'''
+    _env = dict((k.lower(),v) for k,v in os.environ.items())
+    return _env.get(param_name.lower(), None)
+
+_PROXIES = {
+    'http': dict([(k,v) for k,v in parse_url(_get_env('http_proxy')).items() if k in ('host', 'port')]),
+    'https': dict([(k,v) for k,v in parse_url(_get_env('https_proxy')).items() if k in ('host', 'port')]),
+}
 
 def cookie2str(cookie):
     # TODO make cookie2str as part of Headers class

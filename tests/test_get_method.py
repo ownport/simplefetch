@@ -82,6 +82,5 @@ class TestGetMethod(unittest.TestCase):
     def test_timeout(self):
         self.assertRaises(socket.timeout, lambda:simplefetch.get("%ssleep/1" % testall.test_server_host, timeout=0.5))
 
-
 if __name__ == '__main__':
     unittest.main()
