@@ -74,6 +74,16 @@ from io import BytesIO
 from functools import partial
 
 _ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
+
+
+#
+#   Proxy definitions
+#
+def _get_env(param_name):
+    ''' get variable from system environment'''
+    _env = dict((k.lower(),v) for k,v in os.environ.items())
+    return _env.get(param_name.lower(), None)
+
 _PROXIES = {
     'http': _get_env('http_proxy'),
     'https': _get_env('https_proxy'),
@@ -308,12 +318,6 @@ def parse_url(url):
     result['host'] = result['host'].encode('idna').decode('utf-8')
     
     return result
-
-def _get_env(self, param):
-    ''' get variable from system environment'''
-    _env = dict((k.lower(),v) for k,v in os.environ.items())
-    return _env.get(param.lower(), None)
-
 
 def cookie2str(cookie):
     # TODO make cookie2str as part of Headers class
