@@ -153,7 +153,7 @@ class Response(object):
 
     @property
     def status(self):
-        return self.__http_resp.status
+        return int(self.__http_resp.status)
 
     @property
     def reason(self):
@@ -166,10 +166,10 @@ class Response(object):
         '''
         return self.__headers
 
-    def iter_content(self, chunk_size = 1024):
+    def iter_content(self, chunk_size = 8192):
         ''' read content (for streaming and large files)
         
-        chunk_size: size of chunk, default: 1024 bytes
+        chunk_size: size of chunk, default: 8192 bytes
         '''
         while True:
             chunk = self.__http_resp.read(chunk_size)
@@ -255,7 +255,6 @@ class Proxy(object):
         return self.__conn
 
 
-
 class Connection(object):
     ''' HTTP/S Connection '''
     
@@ -279,11 +278,11 @@ class Connection(object):
         except socket.error, err:
             raise ConnectionRequestException(err)
 
-    def response(self):
+    def response(self, content_limit=None):
         '''
         returns response
         '''
-        return Response(self.__conn.getresponse())
+        return Response(self.__conn.getresponse(), content_limit=content_limit)
     
     def close(self):
         '''
@@ -310,31 +309,30 @@ def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAU
     '''
     method = method.upper()
     if method not in _ALLOWED_METHODS:
-        raise UnsupportedMethodException("Method should be one of " + ", ".join(_ALLOWED_METHODS))
+        raise UnsupportedMethodException(method)
 
     parsed_url = parse_url(url)
     conn = Connection(conn_type=parsed_url['scheme'], host=parsed_url['host'], port=parsed_url['port'], timeout=timeout)
 
     # default request headers
-    reqheaders = Headers().items()
+    reqheaders = Headers()
 
+    # prepare data 
+    
     if files:
         content_type, data = _encode_multipart(data, files)
-        reqheaders['Content-Type'] = content_type
+        reqheaders.put('Content-Type', content_type)
     elif isinstance(data, dict):
         data = urlencode(data, 1)
     
     if isinstance(data, basestring) and not files:
-        # httplib will set 'Content-Length', also you can set it by yourself
-        reqheaders["Content-Type"] = "application/x-www-form-urlencoded"
-        # what if the method is GET, HEAD or DELETE 
-        # just do not make so much decisions for users
+        reqheaders.put("Content-Type", "application/x-www-form-urlencoded")
 
     for k, v in headers.items():
-        reqheaders[k.title()] = v 
+        reqheaders.put(k, v) 
 
-    conn.request(method, parsed_url['query'], data, reqheaders)
-    return conn.response()
+    conn.request(method, parsed_url['query'], data, reqheaders.items())
+    return conn.response(content_limit=length_limit)
 
 # TODO if class Request is used, make new shortcuts 
 # some shortcuts
