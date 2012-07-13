@@ -22,8 +22,7 @@ UnknownConnectionTypeException: ftp
 >>>
 
 ```
-In case usage of unknown connection type will be raised exception 'UnknownConnectionTypeException' 
-with indication of unknown connection type.
+In case usage of unknown connection type will be raised exception 'UnknownConnectionTypeException'.
 
 ### Send request
 
@@ -57,8 +56,8 @@ Many HTTP methods are supported: DELETE, HEAD, OPTIONS, PUT, POST, TRACE, PATCH
 ```python
 >>> http_conn.request('GET', '/', None, {})
 >>> resp = http_conn.response()
->>> resp.content
-'index'
+>>> len(resp.content) > 0
+True
 
 ```
 
