@@ -50,6 +50,13 @@ class TestGetMethod(unittest.TestCase):
         self.assertEqual(res.status, 200)
         self.assertEqual(content['method'], 'GET')
 
+    def test_wrong_basic_auth(self):
+        headers = simplefetch.Headers()
+        headers.basic_auth('wrong_username', 'wrong_password')
+        res = simplefetch.get("%sbasic_auth" % testall.test_server_host, headers=headers.items())
+        
+        self.assertEqual(res.status, 401)
+
     def test_basic_auth_query_string(self):
         qs = testall.randdict(5)
         query_string = simplefetch.urlencode(qs)

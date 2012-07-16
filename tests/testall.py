@@ -12,10 +12,12 @@ py3k = (sys.version_info[0] == 3)
 test_server_host = 'http://127.0.0.1:8800/'
 
 def randstr(l=None, chars=string.ascii_letters+string.digits):
+    ''' returns random string '''
     l = l or random.randint(1, 100)
     return ''.join(random.choice(chars) for i in range(l))
 
 def randdict(l=None):
+    ''' returns random dictionary '''
     i = l or random.randint(1, 100)
     d = {}
     for i in range(i):

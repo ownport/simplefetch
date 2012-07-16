@@ -209,8 +209,7 @@ class Connection(object):
         
         self.__via_proxy = False
         
-        # TODO avoid open connection to proxy if requested host is localhost or 127.0.0.1
-        # TODO make config file with exception when proxy is needed
+        # TODO config file support with exceptions when proxy is needed and when is not
         
         if scheme not in _ALLOWED_SCHEMES:
             raise UnknownConnectionSchemeException(scheme)
