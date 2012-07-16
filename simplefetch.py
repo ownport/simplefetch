@@ -77,6 +77,8 @@ from functools import partial
 
 _ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
 
+_PROXY_IGNORE_HOSTS = ('127.0.0.1', 'localhost',)
+
 #
 #   Exceptions
 #
@@ -201,19 +203,25 @@ class Response(object):
 class Connection(object):
     ''' HTTP/S Connection '''
     
-    def __init__(self, conn_type='http', host=None, port=80, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+    def __init__(self, scheme='http', host=None, port=80, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         ''' initial '''
+        
+        self.__via_proxy = False
         
         # TODO avoid open connection to proxy if requested host is localhost or 127.0.0.1
         # TODO make config file with exception when proxy is needed
-        if _PROXIES.get(conn_type, None):
-            host = _PROXIES[conn_type].get('host', None)
-            port = _PROXIES[conn_type].get('port', None)
+        
+        if _PROXIES[scheme].get('host', None) and _PROXIES[scheme].get('port', None) and \
+            host not in _PROXY_IGNORE_HOSTS:
+
+            host = _PROXIES[scheme]['host']
+            port = _PROXIES[scheme]['port']
+            self.__via_proxy = True
 
         self.__conn = None
-        if conn_type == 'http':
+        if scheme == 'http':
             self.__conn = HTTPConnection(host, port, timeout=timeout)
-        elif conn_type == 'https':
+        elif scheme == 'https':
             self.__conn = HTTPSConnection(host, port, timeout=timeout)
         else:
             raise UnknownConnectionTypeException(conn_type)    
@@ -232,6 +240,11 @@ class Connection(object):
         returns response
         '''
         return Response(self.__conn.getresponse(), content_limit=content_limit)
+    
+    @property
+    def  via_proxy(self):
+        ''' returns True if proxy is in use '''
+        return self.__via_proxy
     
     def close(self):
         '''
@@ -256,21 +269,18 @@ def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAU
     
     returns Response object
     '''
-    via_proxy = False
-    
     method = method.upper()
     if method not in _ALLOWED_METHODS:
         raise UnsupportedMethodException(method)
 
     parsed_url = parse_url(url)
     scheme = parsed_url.get('scheme')
-    if _PROXIES.get(scheme, None):
-        via_proxy = True
-        proxy_host = _PROXIES[scheme]['host']
-        proxy_port = _PROXIES[scheme]['port']
-        conn = Connection(conn_type=scheme, host=proxy_host, port=proxy_port, timeout=timeout)
-    else:
-        conn = Connection(conn_type=parsed_url['scheme'], host=parsed_url['host'], port=parsed_url['port'], timeout=timeout)
+
+    # connection with proxy support
+    # by default for connection object all parameters defined based on information from URL
+    # but in case when proxy defined in system environment these parameters will be reassigned
+    # To check it, use connection.via_proxy property: True if proxy is used
+    conn = Connection(conn_type=parsed_url['scheme'], host=parsed_url['host'], port=parsed_url['port'], timeout=timeout)
 
     # default request headers
     reqheaders = Headers()
@@ -289,10 +299,10 @@ def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAU
     for k, v in headers.items():
         reqheaders.put(k, v) 
 
-    if via_proxy:
+    if conn.via_proxy:
         conn.request(method, url, data, reqheaders.items())
     else:
-        conn.request(method, parsed_url['query'], data, reqheaders.items())
+        conn.request(method, parsed_url['full_path'], data, reqheaders.items())
     return conn.response(content_limit=length_limit)
 
 # TODO if class Request is used, make new shortcuts 
@@ -311,13 +321,15 @@ patch = partial(fetch, method="PATCH")
 def parse_url(url):
     ''' returns dictionary of parsed url 
     
-    username, password, scheme, host, port, query
+    scheme, username, password, host, port, full_path
+    
+    where full_path is combination of path + query + fragment
     '''
     result = dict()
     if not isinstance(url, (str, unicode)):
         return result
     
-    parsed = urlparse.urlparse(url)
+    parsed = urlparse.urlsplit(url)
     
     result['scheme'] = parsed.scheme
     result['username'] = parsed.username
@@ -325,11 +337,11 @@ def parse_url(url):
     result['host'] = parsed.hostname.encode('idna').decode('utf-8')
     result['port'] = parsed.port
 
-    result['query'] = parsed.path
+    result['full_path'] = parsed.path
     if parsed.query:
-        result['query'] += '?' + parsed.query
-
-    # TODO is it needed??? result['params'] = parsed.params
+        result['full_path'] += '?' + parsed.query
+    if parsed.fragment:
+        result['full_path'] += '#' + parsed.fragment
 
     return result
 
