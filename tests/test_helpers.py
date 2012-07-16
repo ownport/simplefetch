@@ -23,15 +23,15 @@ class TestHelpers(unittest.TestCase):
 
         url = 'http://www.example.com/path'
         parsed_url = simplefetch.parse_url(url)
-        self.assertEqual(parsed_url['query'], '/path')
+        self.assertEqual(parsed_url['full_path'], '/path')
 
         url = 'http://www.example.com/path?key1=value1&key2=value2'
         parsed_url = simplefetch.parse_url(url)
-        self.assertEqual(parsed_url['query'], '/path?key1=value1&key2=value2')
+        self.assertEqual(parsed_url['full_path'], '/path?key1=value1&key2=value2')
 
         url = 'http://www.example.com/path?key1=value1&key2=value2#fragment'
         parsed_url = simplefetch.parse_url(url)
-        self.assertEqual(parsed_url['query'], '/path?key1=value1&key2=value2')
+        self.assertEqual(parsed_url['full_path'], '/path?key1=value1&key2=value2#fragment')
 
         url = 'https://username:password@www.example.com'
         parsed_url = simplefetch.parse_url(url)

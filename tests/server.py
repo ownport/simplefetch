@@ -66,6 +66,11 @@ app = bottle.app()
 def index():
     return normal_formsdict()
 
+@app.route('/#fragment', method=['GET', 'POST', 'PUT', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH', 'TRACE'])
+def index():
+    return normal_formsdict()
+
+
 @app.route('/basic_auth', method=['GET', 'POST', 'PUT', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'])
 @bottle.auth_basic(basic_auth_check)
 def basic_auth():
@@ -78,7 +83,7 @@ def sleep(seconds):
 
     return normal_formsdict()
 
-@app.route('http://www.google.com', method=['GET', 'POST', 'PUT', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'])
+@app.route('http://www.example.com', method=['GET', 'POST', 'PUT', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'])
 def index():
     return normal_formsdict()
 

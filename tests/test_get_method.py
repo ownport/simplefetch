@@ -39,8 +39,7 @@ class TestGetMethod(unittest.TestCase):
 
         self.assertEqual(res.status, 200)
         self.assertEqual(content['method'], 'GET')
-        self.assertEqual(content['query_string'], query_string)
-        self.assertEqual(content['get'], qs)
+        self.assertEqual(content['query_string'], "%s#fragment" % query_string)
 
     def test_basic_auth(self):
         headers = simplefetch.Headers()
@@ -76,8 +75,7 @@ class TestGetMethod(unittest.TestCase):
 
         self.assertEqual(res.status, 200)
         self.assertEqual(content['method'], 'GET')
-        self.assertEqual(content['query_string'], query_string)
-        self.assertEqual(content['get'], qs)
+        self.assertEqual(content['query_string'], "%s#fragment" % query_string)
 
     def test_timeout(self):
         self.assertRaises(socket.timeout, lambda:simplefetch.get("%ssleep/1" % testall.test_server_host, timeout=0.5))
