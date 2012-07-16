@@ -75,7 +75,8 @@ else:
 from io import BytesIO
 from functools import partial
 
-_ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH")
+_ALLOWED_SCHEMES = ("http", "https", )
+_ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH", )
 
 _PROXY_IGNORE_HOSTS = ('127.0.0.1', 'localhost',)
 
@@ -83,7 +84,7 @@ _PROXY_IGNORE_HOSTS = ('127.0.0.1', 'localhost',)
 #   Exceptions
 #
 
-class UnknownConnectionTypeException(Exception):
+class UnknownConnectionSchemeException(Exception):
     pass
 
 class ConnectionRequestException(Exception):
@@ -211,6 +212,9 @@ class Connection(object):
         # TODO avoid open connection to proxy if requested host is localhost or 127.0.0.1
         # TODO make config file with exception when proxy is needed
         
+        if scheme not in _ALLOWED_SCHEMES:
+            raise UnknownConnectionSchemeException(scheme)
+            
         if _PROXIES[scheme].get('host', None) and _PROXIES[scheme].get('port', None) and \
             host not in _PROXY_IGNORE_HOSTS:
 
@@ -224,7 +228,7 @@ class Connection(object):
         elif scheme == 'https':
             self.__conn = HTTPSConnection(host, port, timeout=timeout)
         else:
-            raise UnknownConnectionTypeException(conn_type)    
+            raise UnknownConnectionSchemeException(scheme)    
 
     def request(self, method, url, body, headers):
         ''' 
@@ -280,7 +284,7 @@ def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAU
     # by default for connection object all parameters defined based on information from URL
     # but in case when proxy defined in system environment these parameters will be reassigned
     # To check it, use connection.via_proxy property: True if proxy is used
-    conn = Connection(conn_type=parsed_url['scheme'], host=parsed_url['host'], port=parsed_url['port'], timeout=timeout)
+    conn = Connection(scheme=parsed_url['scheme'], host=parsed_url['host'], port=parsed_url['port'], timeout=timeout)
 
     # default request headers
     reqheaders = Headers()

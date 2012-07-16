@@ -2,7 +2,7 @@
 
 ```python
 >>> import simplefetch
->>> conn = simplefetch.Connection(conn_type='http')
+>>> conn = simplefetch.Connection(scheme='http')
 >>> conn.request('GET', 'http://devel.ownport.net', None, {})
 >>> resp = conn.response()
 >>> resp.status

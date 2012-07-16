@@ -6,19 +6,19 @@ It's used as building block for creation HTTP/S connection to proxy server
 ### Creation new connection
 ```python
 >>> import simplefetch
->>> http_conn = simplefetch.Connection(conn_type='http', host='localhost', port=8800)
+>>> http_conn = simplefetch.Connection(scheme='http', host='localhost', port=8800)
 >>> type(http_conn)
 <class 'simplefetch.Connection'>
 >>>
->>> https_conn = simplefetch.Connection(conn_type='https', host='localhost', port=8800)
+>>> https_conn = simplefetch.Connection(scheme='https', host='localhost', port=8800)
 >>> type(https_conn)
 <class 'simplefetch.Connection'>
 >>> https_conn.close()
 >>>
->>> ftp_conn = simplefetch.Connection(conn_type='ftp', host='localhost', port=8800)
+>>> ftp_conn = simplefetch.Connection(scheme='ftp', host='localhost', port=8800)
 Traceback (most recent call last):
 ...
-UnknownConnectionTypeException: ftp
+UnknownConnectionSchemeException: ftp
 >>>
 
 ```
