@@ -5,7 +5,7 @@
 #
 
 
-__version__ = '0.2.0-c_concept'
+__version__ = '0.3.0'
 __author__ = 'Andrey Usov <http://devel.ownport.net>'
 __url__ = 'https://github.com/ownport/simplefetch'
 __license__ = '''
@@ -209,7 +209,7 @@ class Connection(object):
         if _PROXIES.get(conn_type, None):
             host = _PROXIES[conn_type].get('host', None)
             port = _PROXIES[conn_type].get('port', None)
-        
+
         self.__conn = None
         if conn_type == 'http':
             self.__conn = HTTPConnection(host, port, timeout=timeout)
@@ -263,10 +263,12 @@ def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAU
         raise UnsupportedMethodException(method)
 
     parsed_url = parse_url(url)
-    if _PROXIES.get(parsed_url.get('scheme'), None):
-        proxy_host, proxy_port = _PROXIES[parsed_url.get('scheme')]
+    scheme = parsed_url.get('scheme')
+    if _PROXIES.get(scheme, None):
         via_proxy = True
-        conn = Connection(conn_type=parsed_url['scheme'], host=proxy_host, port=proxy_port, timeout=timeout)
+        proxy_host = _PROXIES[scheme]['host']
+        proxy_port = _PROXIES[scheme]['port']
+        conn = Connection(conn_type=scheme, host=proxy_host, port=proxy_port, timeout=timeout)
     else:
         conn = Connection(conn_type=parsed_url['scheme'], host=parsed_url['host'], port=parsed_url['port'], timeout=timeout)
 
@@ -311,26 +313,24 @@ def parse_url(url):
     
     username, password, scheme, host, port, query
     '''
-    # TODO add extraction username and password from url, for example: http://username:password@host:port/    
     result = dict()
-
-    if not url:
+    if not isinstance(url, (str, unicode)):
         return result
     
-    _scheme, _netloc, _path, _params, _query, _fragment = urlparse.urlparse(url)
+    parsed = urlparse.urlparse(url)
     
-    result['scheme'] = _scheme
-    result['query'] = _path
-    if _query: result['query'] += '?' + _query
-    
-    # handle 'Host'
-    if ':' in _netloc:
-        result['host'], result['port'] = _netloc.rsplit(':', 1)
-        result['port'] = int(result['port'])
-    else:
-        result['host'], result['port'] = _netloc, None
-    result['host'] = result['host'].encode('idna').decode('utf-8')
-    
+    result['scheme'] = parsed.scheme
+    result['username'] = parsed.username
+    result['password'] = parsed.password
+    result['host'] = parsed.hostname.encode('idna').decode('utf-8')
+    result['port'] = parsed.port
+
+    result['query'] = parsed.path
+    if parsed.query:
+        result['query'] += '?' + parsed.query
+
+    # TODO is it needed??? result['params'] = parsed.params
+
     return result
 
 #
