@@ -118,9 +118,10 @@ class Headers(object):
     to simplify fetch() interface, class Headers helps to manipulate parameters
     '''
     def __init__(self):
-        ''' make default headers '''
+        ''' use default paramters for header '''
         self.__headers = {
             'Accept': '*/*',
+            #'Accept-Encoding': ', '.join(('identity', 'deflate', 'compress', 'gzip')), 
             'User-Agent':  'simplefetch/' + __version__,
         }
     
@@ -213,7 +214,7 @@ class Connection(object):
         
         if scheme not in _ALLOWED_SCHEMES:
             raise UnknownConnectionSchemeException(scheme)
-            
+        
         if _PROXIES[scheme].get('host', None) and _PROXIES[scheme].get('port', None) and \
             host not in _PROXY_IGNORE_HOSTS:
 
@@ -289,7 +290,6 @@ def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAU
     reqheaders = Headers()
 
     # prepare data 
-    
     if files:
         content_type, data = _encode_multipart(data, files)
         reqheaders.put('Content-Type', content_type)
@@ -329,7 +329,7 @@ def parse_url(url):
     where full_path is combination of path + query + fragment
     '''
     result = dict()
-    if not isinstance(url, (str, unicode)):
+    if not isinstance(url, (str, unicode)) or not url:
         return result
     
     parsed = urlparse.urlsplit(url)
