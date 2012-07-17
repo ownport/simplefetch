@@ -5,7 +5,7 @@
 #
 
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 __author__ = 'Andrey Usov <http://devel.ownport.net>'
 __url__ = 'https://github.com/ownport/simplefetch'
 __license__ = '''
