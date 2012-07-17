@@ -93,20 +93,8 @@ class ConnectionRequestException(Exception):
 class ContentLengthLimitException(Exception):
     pass
 
-#
-#   Utils
-#
-
-def decode_gzip(data):
-    gzipper = gzip.GzipFile(fileobj=BytesIO(data))
-    return gzipper.read()
-
-
-def decode_deflate(data):
-    try:
-        return zlib.decompress(data)
-    except zlib.error:
-        return zlib.decompress(data, -zlib.MAX_WBITS)
+class UnknownContentEncodingException(Exception):
+    pass
 
 #
 #   Classes
@@ -121,7 +109,7 @@ class Headers(object):
         ''' use default paramters for header '''
         self.__headers = {
             'Accept': '*/*',
-            #'Accept-Encoding': ', '.join(('identity', 'deflate', 'compress', 'gzip')), 
+            'Accept-Encoding': ', '.join(('identity', 'deflate', 'compress', 'gzip')), 
             'User-Agent':  'simplefetch/' + __version__,
         }
     
@@ -153,7 +141,9 @@ class Request(object):
 class Response(object):
     ''' Response '''
     def __init__(self, http_resp, content_limit=None):
+    
         self.__http_resp = http_resp
+        self.__CONTENT_DECODERS = { 'gzip': decode_gzip,'deflate': decode_deflate, }
         
         # TODO store headers to object Headers 
         self.__headers = dict((k.lower(), v) for k, v in self.__http_resp.getheaders())
@@ -199,7 +189,18 @@ class Response(object):
                 content += chunk
                 if self.__content_limit and len(content) > self.__content_limit:
                     raise ContentLengthLimitException("Content length is more than %d bytes" % self.__content_limit)  
-            self.__content = content
+            
+            # decode content if encoded
+            encoding = self.headers.get('content-encoding', None)
+            decoder = self.__CONTENT_DECODERS.get(encoding)
+            if encoding and not decoder:
+                raise UnknownContentEncodingException(encoding)                
+            
+            if decoder:
+                self.__content = decoder(content)
+            else:
+                self.__content = content
+            
         return self.__content
 
 class Connection(object):
@@ -258,6 +259,20 @@ class Connection(object):
 #
 #   Helpers
 #
+
+def decode_gzip(data):
+    ''' decode gzipped content '''
+    gzipper = gzip.GzipFile(fileobj=BytesIO(data))
+    return gzipper.read()
+
+
+def decode_deflate(data):
+    ''' decode deflate content '''
+    try:
+        return zlib.decompress(data)
+    except zlib.error:
+        return zlib.decompress(data, -zlib.MAX_WBITS)
+
 
 def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
             files={}, length_limit=None):
