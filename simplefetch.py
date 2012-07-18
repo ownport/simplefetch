@@ -5,7 +5,7 @@
 #
 
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 __author__ = 'Andrey Usov <http://devel.ownport.net>'
 __url__ = 'https://github.com/ownport/simplefetch'
 __license__ = '''
@@ -231,7 +231,7 @@ class Connection(object):
         else:
             raise UnknownConnectionSchemeException(scheme)    
 
-    def request(self, method, url, body, headers):
+    def request(self, method='GET', url, body, headers):
         ''' 
         send request 
         '''
@@ -273,6 +273,11 @@ def decode_deflate(data):
     except zlib.error:
         return zlib.decompress(data, -zlib.MAX_WBITS)
 
+# TODO  data or payload? payload is body content for a POST or PUT request.
+# TODO  follow_redirects = (False)/True. If True, responses that are HTTP redirects are followed. 
+#       The response data will be from the final location. If False (default), redirects are not followed
+# TODO  redirects limitation
+# TODO  redirects history
 
 def fetch(url, method="GET", data=None, headers={}, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
             files={}, length_limit=None):
