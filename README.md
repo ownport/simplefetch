@@ -63,3 +63,12 @@ or via Connection class
 >>> len(resp.content)
 86641
 ```
+
+## Specifications (doctests)
+
+[Class Connection](https://github.com/ownport/simplefetch/blob/master/tests/connection.md)
+[Helpers](https://github.com/ownport/simplefetch/blob/master/tests/helpers.md)
+[Proxy](https://github.com/ownport/simplefetch/blob/master/tests/proxy.md)
+
+
+
