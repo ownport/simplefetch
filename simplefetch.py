@@ -231,7 +231,7 @@ class Connection(object):
         else:
             raise UnknownConnectionSchemeException(scheme)    
 
-    def request(self, method='GET', url, body, headers):
+    def request(self, method='GET', url=None, body=None, headers={}):
         ''' 
         send request 
         '''
