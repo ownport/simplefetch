@@ -46,6 +46,15 @@ Using custom headers (via Headers class)
 Automatic proxy support
 
 ```python
+>>> conn = simplefetch.get('http://devel.ownport.net')
+>>> resp = conn.response()
+>>> resp.headers
+{'via': '1.1 PROXY, 'proxy-connection': 'Keep-Alive', 'x-content-type-options': 'nosniff', 'transfer-encoding': 'chunked', 'expires': 'Wed, 18 Jul 2012 05:37:59 GMT', 'server': 'GSE', 'last-modified': 'Wed, 11 Jul 2012 05:51:27 GMT', 'connection': 'Keep-Alive', 'etag': '"1fc3cfe5-7483-4765-8f67-eee40b813abc"', 'cache-control': 'private, max-age=0', 'date': 'Wed, 18 Jul 2012 05:37:59 GMT', 'content-type': 'text/html; charset=UTF-8', 'x-xss-protection': '1; mode=block'}
+>>> len(resp.content)
+86641
+```
+or via Connection class
+```python
 >>> conn = simplefetch.Connection(scheme='http')
 >>> conn.request('GET', 'http://devel.ownport.net', None, {} )
 >>> resp = conn.response()
