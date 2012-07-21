@@ -8,7 +8,7 @@ export https_proxy=https://<proxy_server>:<port>
 ```
 HTTPS_PROXY is not defined as test server is not support this type of connection at the moment
 
-Connect to server devel.ownport.net via Connection class. When system environment variables 
+Connect to server www.example.com via Connection class. When system environment variables 
 (HTTP_PROXY,HTTPS_PROXY) defined in the system, Connection class detect it and used it for requests.
 
 ```python
