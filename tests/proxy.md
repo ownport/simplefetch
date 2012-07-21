@@ -1,5 +1,15 @@
 # Proxy
 
+Before running these examples HTTP_PROXY and HTTPS_PROXY should be defined in your system
+
+```sh
+export http_proxy=http://<proxy_server>:<port>
+export https_proxy=https://<proxy_server>:<port>
+```
+
+Connect to server devel.ownport.net via Connection class. When system environment variables 
+(HTTP_PROXY,HTTPS_PROXY) defined in the system, Connection class detect it and used it for requests.
+
 ```python
 >>> import simplefetch
 >>> conn = simplefetch.Connection(scheme='http')
@@ -12,6 +22,8 @@ True
 
 ```
 
+More simple way to make GET request is use get() alias. It will make the same operations as described above.
+
 ```python
 >>> resp = simplefetch.get('http://devel.ownport.net')
 >>> resp.status
@@ -20,6 +32,8 @@ True
 True
 
 ```
+
+HTTPS proxy is used but due to the issue https://github.com/ownport/simplefetch/issues/1 it's not working properly.
 
 ```python
 >>> resp = simplefetch.get('https://github.com')
