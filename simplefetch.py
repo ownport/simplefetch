@@ -96,6 +96,9 @@ class ContentLengthLimitException(Exception):
 class UnknownContentEncodingException(Exception):
     pass
 
+class UndefinedHostException(Exception):
+    pass
+
 #
 #   Classes
 #
@@ -223,6 +226,9 @@ class Connection(object):
             port = _PROXIES[scheme]['port']
             self.__via_proxy = True
 
+        if not host:
+            raise UndefinedHostException(host)
+            
         self.__conn = None
         if scheme == 'http':
             self.__conn = HTTPConnection(host, port, timeout=timeout)
