@@ -34,7 +34,7 @@ True
 
 ```
 
-HTTPS proxy is used but due to the issue https://github.com/ownport/simplefetch/issues/1 it's not working properly.
+*Note:* HTTPS proxy is used but due to the issue https://github.com/ownport/simplefetch/issues/1 it's not working properly.
 
 ```python
 >>> resp = simplefetch.get('https://github.com')
