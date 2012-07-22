@@ -78,7 +78,7 @@ from functools import partial
 _ALLOWED_SCHEMES = ("http", "https", )
 _ALLOWED_METHODS = ("GET", "DELETE", "HEAD", "OPTIONS", "PUT", "POST", "TRACE", "PATCH", )
 
-_PROXY_IGNORE_HOSTS = ('127.0.0.1', 'localhost',)
+PROXY_IGNORE_HOSTS = ('127.0.0.1', 'localhost',)
 
 #
 #   Exceptions
@@ -219,7 +219,7 @@ class Connection(object):
         if scheme not in _ALLOWED_SCHEMES:
             raise UnknownConnectionSchemeException(scheme)
         
-        if host not in _PROXY_IGNORE_HOSTS:
+        if host not in PROXY_IGNORE_HOSTS:
             if PROXIES.get(scheme):
                 parsed_proxy = parse_url(PROXIES[scheme])
                 host = parsed_proxy['host']
