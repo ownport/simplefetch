@@ -219,17 +219,16 @@ class Connection(object):
         if scheme not in _ALLOWED_SCHEMES:
             raise UnknownConnectionSchemeException(scheme)
         
-        if _PROXIES[scheme].get('host', None) and _PROXIES[scheme].get('port', None) and \
-            host not in _PROXY_IGNORE_HOSTS:
-
-            host = _PROXIES[scheme]['host']
-            port = _PROXIES[scheme]['port']
-            self.__via_proxy = True
+        if host not in _PROXY_IGNORE_HOSTS:
+            if PROXIES.get(scheme):
+                parsed_proxy = parse_url(PROXIES[scheme])
+                host = parsed_proxy['host']
+                port = parsed_proxy['port']
+                self.__via_proxy = True
 
         if not host:
             raise UndefinedHostException(host)
             
-        self.__conn = None
         if scheme == 'http':
             self.__conn = HTTPConnection(host, port, timeout=timeout)
         elif scheme == 'https':
@@ -347,11 +346,10 @@ trace = partial(fetch, method="TRACE", files={}, data=None)
 patch = partial(fetch, method="PATCH")
     
 
-def parse_url(url):
+def parse_url(url, returns=()):
     ''' returns dictionary of parsed url 
     
     scheme, username, password, host, port, full_path
-    
     where full_path is combination of path + query + fragment
     '''
     result = dict()
@@ -377,15 +375,21 @@ def parse_url(url):
 #
 #   Proxy definitions (from system environment)
 #
-def _get_env(param_name):
-    ''' get variable from system environment'''
-    _env = dict((k.lower(),v) for k,v in os.environ.items())
-    return _env.get(param_name.lower(), None)
-
-_PROXIES = {
-    'http': dict([(k,v) for k,v in parse_url(_get_env('http_proxy')).items() if k in ('host', 'port')]),
-    'https': dict([(k,v) for k,v in parse_url(_get_env('https_proxy')).items() if k in ('host', 'port')]),
-}
+def _get_proxies_from_env():
+    ''' get proxy configuration from system environment'''
+    proxies = {}
+    
+    http_proxy = os.getenv('http_proxy') or os.getenv('HTTP_PROXY')
+    if http_proxy:
+        proxies['http'] = http_proxy
+        
+    https_proxy = os.getenv('https_proxy') or os.getenv('HTTPS_PROXY')
+    if https_proxy:
+        proxies['https'] = https_proxy
+        
+    return proxies
+    
+PROXIES = _get_proxies_from_env()
 
 def cookie2str(cookie):
     # TODO make cookie2str as part of Headers class
