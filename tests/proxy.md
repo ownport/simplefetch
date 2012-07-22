@@ -13,6 +13,7 @@ Connect to server www.example.com via Connection class. When system environment 
 
 ```python
 >>> import simplefetch
+>>> simplefetch.PROXIES['http'] = 'http://127.0.0.1:8800'
 >>> conn = simplefetch.Connection(scheme='http')
 >>> conn.request('GET', 'http://www.example.com', None, {})
 >>> resp = conn.response()
