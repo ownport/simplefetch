@@ -32,11 +32,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-#   TODO
-#   Connection.request
-#   Connection.response
 
-# TODO review which modules can be removed as unsed
 import os
 import sys
 import zlib
@@ -50,6 +46,7 @@ if sys.version_info >= (3, 0):
 else:
     py3k = False
 
+# TODO review which modules can be removed as unsed
 if py3k:
     import urllib.parse as urlparse
     from http.client import HTTP_PORT, HTTPS_PORT
