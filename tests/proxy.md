@@ -33,6 +33,8 @@ More simple way to make GET request is use get() alias. It will make the same op
 True
 
 ```
+If there's needed to ignore for some hosts to send request via proxy, you can add these hosts in simplefetch.PROXY_IGNORE_HOSTS.
+By default only requests to 'localhost' and '127.0.0.1' are ignored
 
 *Note:* HTTPS proxy is used but due to the issue https://github.com/ownport/simplefetch/issues/1 it's not working properly.
 
