@@ -51,7 +51,6 @@ else:
     py3k = False
 
 if py3k:
-    import http.cookies as Cookie
     import urllib.parse as urlparse
     from http.client import HTTP_PORT, HTTPS_PORT
     from http.client import HTTPConnection, HTTPSConnection, HTTPException
@@ -62,7 +61,6 @@ if py3k:
     def u(s):
         return s
 else:
-    import Cookie
     import urlparse
     from httplib import HTTP_PORT, HTTPS_PORT
     from httplib import HTTPConnection, HTTPSConnection, HTTPException
@@ -214,7 +212,8 @@ class Connection(object):
         
         self.__via_proxy = False
         
-        # TODO config file support with exceptions when proxy is needed and when is not
+        # TODO  config file support with exceptions when proxy is needed and when is not
+        #       Is it really needed? We can use PROXY_IGNORE_HOSTS
         
         if scheme not in _ALLOWED_SCHEMES:
             raise UnknownConnectionSchemeException(scheme)
@@ -390,15 +389,6 @@ def _get_proxies_from_env():
     return proxies
     
 PROXIES = _get_proxies_from_env()
-
-def cookie2str(cookie):
-    # TODO make cookie2str as part of Headers class
-    '''
-    Convert Set-Cookie header to cookie string.
-    '''
-    c = Cookie.SimpleCookie(sc)
-    sc = ['%s=%s' % (i.key, i.value) for i in c.itervalues()]
-    return '; '.join(sc)
 
 _boundary_prefix = None
 def choose_boundary():
