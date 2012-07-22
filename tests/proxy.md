@@ -1,6 +1,6 @@
 # Proxy
 
-Before running these examples HTTP_PROXY and HTTPS_PROXY should be defined in your system
+To define HTTP_PROXY and HTTPS_PROXY use
 
 ```sh
 export http_proxy=http://127.0.0.1:8800
