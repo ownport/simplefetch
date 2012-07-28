@@ -71,4 +71,10 @@ or via Connection class
  * [Proxy](https://github.com/ownport/simplefetch/blob/master/tests/proxy.md)
 
 
+## TODO
+
+ * sometimes encoding format coming from server in wrong format, make mapping known errors
+ * handling exceptions for h.request/h.response
+ * non-blocking thread-safe 
+ * working in Pool
 
