@@ -75,6 +75,6 @@ or via Connection class
 
  * sometimes encoding format coming from server in wrong format, make mapping known errors
  * handling exceptions for h.request/h.response
- * non-blocking thread-safe 
- * working in Pool
+ * non-blocking thread-safe (is it really needed?)
+ * working in Pool (thread support)
 
