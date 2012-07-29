@@ -38,6 +38,8 @@ Example: get HTTP status of urls (with threads)
 >>> no_threads_time > threads_time
 True
 
->>> print no_threads_time, threads_time
 ```
+As you can see from the code below the duration of execution 10 requests with no threads and 
+with threads is different. In case of use threads on my laptop it's 8 times faster with threads 
+than no threads.
 
