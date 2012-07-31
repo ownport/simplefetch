@@ -3,13 +3,20 @@
 There's no thread in support in simplefetch library. To run many request in parallel you will need to use 
 standard python module - thread
 
+For testing threads you need to use asynchttpsrv.py as test server. It's support multiple connections
+
+```
+$ python tests/package/asynchttpsrv.py
+HTTP Server ('127.0.0.1', 8800) is starting
+```
+
 Example: get HTTP status of urls (without threads)
 
 ```python
 >>> import datetime
 >>> import simplefetch
 >>> def worker(i):
-...     resp = simplefetch.get('http://www.yahoo.com')
+...     resp = simplefetch.get('http://127.0.0.1:8800')
 ...     if resp.status <> 200:
 ...         raise Exception('Unsuccessful request')
 ...
