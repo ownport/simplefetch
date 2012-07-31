@@ -69,6 +69,7 @@ or via Connection class
  * [Class Connection](https://github.com/ownport/simplefetch/blob/master/tests/connection.md)
  * [Helpers](https://github.com/ownport/simplefetch/blob/master/tests/helpers.md)
  * [Proxy](https://github.com/ownport/simplefetch/blob/master/tests/proxy.md)
+ * [Threads](https://github.com/ownport/simplefetch/blob/master/tests/threads.md)
 
 
 ## TODO
