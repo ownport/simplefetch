@@ -247,11 +247,14 @@ class HTTPServer(asyncore.dispatcher):
         
         
 if __name__ == '__main__':
+    import time
+    import random
     
     def appl_handler(request):
         message = 'You requested %s via method %s on AsyncHTTPServer-0.1\n' 
         message = message % (request['uri'], request['method'])
 
+        time.sleep(random.randrange(0,5))
         header = "HTTP/1.1 200 (OK)\r\nContent-Length: %d\r\nServer: AsyncHTTPServer-0.1\r\n\r\n%s"
         return  header % (len(message), message)
     
