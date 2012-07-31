@@ -20,8 +20,9 @@ Example: get HTTP status of urls (without threads)
 ...     if resp.status <> 200:
 ...         raise Exception('Unsuccessful request')
 ...
+>>> total_threads = 10000
 >>> now = datetime.datetime.now()
->>> for i in range(10):
+>>> for i in range(total_threads):
 ...     worker(i)
 >>> no_threads_time = datetime.datetime.now() - now
 
@@ -32,8 +33,9 @@ Example: get HTTP status of urls (with threads)
 ```python
 >>> import threading
 >>> now = datetime.datetime.now()
->>> for i in range(10):
+>>> for i in range(total_threads):
 ...     t = threading.Thread(target=worker, args=(i,))
+...     t.setDaemon(True)
 ...     t.start()
 ...
 >>> main_thread = threading.currentThread()
@@ -42,6 +44,7 @@ Example: get HTTP status of urls (with threads)
 ...         continue
 ...     t.join()
 >>> threads_time = datetime.datetime.now() - now
+>>> print no_threads_time, threads_time
 >>> no_threads_time > threads_time
 True
 
