@@ -49,7 +49,6 @@ Example: get HTTP status of urls (with threads)
 True
 
 ```
-As you can see from the code below the duration of execution 10 requests with no threads and 
-with threads is different. In case of use threads on my laptop it's 8 times faster with threads 
-than no threads.
+As you can see from the code below the duration of execution requests with no threads and 
+with threads is different. On my laptop it's 8 times faster with threads than no threads.
 
