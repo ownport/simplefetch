@@ -116,7 +116,7 @@ class Headers(object):
         self.__headers = {
             'Accept': '*/*',
             'Accept-Encoding': ', '.join(('identity', 'deflate', 'compress', 'gzip')), 
-            'User-Agent':  'simplefetch/' + __version__,
+            'User-Agent':  'Mozilla/5.0 (X11; Linux x86_64) simplefetch/' + __version__,
         }
     
     def basic_auth(self, username, password):
