@@ -128,7 +128,8 @@ class Headers(object):
     # TODO support list of parameters
     def put(self, k, v):
         ''' add new parameter to headers '''
-        self.__headers[k.title()] = v
+        if v:
+            self.__headers[k.title()] = v
     
     # TODO  rename method items() to dump() with support defferent formats 
     #       like dict, list/tuple, json, ...
