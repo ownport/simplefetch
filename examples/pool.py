@@ -11,8 +11,6 @@ if __name__ == '__main__':
     ''' main '''    
 
     from gevent.pool import Pool
-    from gevent import monkey
-    monkey.patch_socket()
     
     import time
     import simplefetch
@@ -40,12 +38,14 @@ if __name__ == '__main__':
     for url in urls:
         tasks.spawn(fetch, url)
     tasks.join()
-    print 'gevent.time: %0.5f secs' % (time.time() - start_time)
+    diff_time = time.time() - start_time
+    print 'gevent.time: %0.5f secs, %0.5f secs/request ' % (diff_time, diff_time/len(urls))
 
     # sequential 
     start_time = time.time()
     for url in urls:
         fetch(url)
-    print 'sequential.time: %0.5f secs' % (time.time() - start_time)
+    diff_time = time.time() - start_time
+    print 'sequential.time: %0.5f secs, %0.5f secs/request ' % (diff_time, diff_time/len(urls))
 
 

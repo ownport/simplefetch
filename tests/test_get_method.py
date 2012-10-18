@@ -1,8 +1,14 @@
+# check gevent support
+try:
+    from gevent import socket
+except:
+    import socket
+
 import json
-import socket
 import testall
 import unittest
 import simplefetch
+
 
 class TestGetMethod(unittest.TestCase):
 
@@ -85,7 +91,10 @@ class TestGetMethod(unittest.TestCase):
         self.assertEqual(content['query_string'], "%s#fragment" % query_string)
 
     def test_timeout(self):
-        self.assertRaises(socket.timeout, lambda:simplefetch.get("%ssleep/1" % testall.test_server_host, timeout=0.5))
+        self.assertRaises(
+                            simplefetch.ConnectionRequestException, \
+                            lambda:simplefetch.get("%ssleep/1" % testall.test_server_host, timeout=0.001)
+                        )
 
 if __name__ == '__main__':
     unittest.main()

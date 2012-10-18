@@ -37,7 +37,6 @@ import os
 import sys
 import zlib
 import gzip
-import socket
 import base64
 
 if sys.version_info >= (3, 0):
@@ -45,6 +44,15 @@ if sys.version_info >= (3, 0):
     unicode = str
 else:
     py3k = False
+
+# check gevent support
+try:
+    from gevent import socket
+    from gevent import monkey
+    monkey.patch_socket()
+except:
+    import socket
+
 
 # TODO review which modules can be removed as unsed
 if py3k:
