@@ -5,7 +5,7 @@
 #
 
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 __author__ = 'Andrey Usov <http://devel.ownport.net>'
 __url__ = 'https://github.com/ownport/simplefetch'
 __license__ = '''
@@ -427,16 +427,23 @@ def _encode_multipart(data, files):
     part_boundary = b('--%s\r\n' % boundary)
 
     if isinstance(data, dict):
-        for name, value in data.items():
-            body.write(part_boundary)
-            writer(body).write('Content-Disposition: form-data; name="%s"\r\n' % name)
-            body.write(b'Content-Type: text/plain\r\n\r\n')
-            if py3k and isinstance(value, str): 
-                writer(body).write(value)
-            else:
-                body.write(value)
-            body.write(b'\r\n')
-            
+        for name, values in data.items():
+            if not isinstance(list, tuple, set):
+                # behave like urllib.urlencode(dict, 1)
+                values = (values, )
+            for value in values:
+                body.write(part_boundary)
+                writer(body).write('Content-Disposition: form-data; '
+                                   'name="%s"\r\n' % name)
+                body.write(b'Content-Type: text/plain\r\n\r\n')
+                if isinstance(value, int):
+                    value = str(value)
+                if py3k and isinstance(value, str):
+                    writer(body).write(value)
+                else:
+                    body.write(value)
+                body.write(b'\r\n')
+                            
     for fieldname, f in files.items():
         if isinstance(f, tuple):
             filename, f = f
